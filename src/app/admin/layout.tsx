@@ -2,6 +2,8 @@ import Link from "next/link";
 
 import { requireAdminUser } from "@/lib/auth/admin";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const user = await requireAdminUser();
 

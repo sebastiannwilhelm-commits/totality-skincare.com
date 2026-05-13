@@ -18,7 +18,20 @@ const cormorant = Cormorant_Garamond({
   variable: "--font-serif",
 });
 
+function resolveMetadataBase(): URL {
+  const raw = process.env.NEXT_PUBLIC_APP_URL?.trim();
+  if (raw) {
+    try {
+      return new URL(raw);
+    } catch {
+      /* ignore */
+    }
+  }
+  return new URL("http://localhost:3000");
+}
+
 export const metadata: Metadata = {
+  metadataBase: resolveMetadataBase(),
   title: {
     default: `${SITE.name} | Medical-grade skincare`,
     template: `%s | ${SITE.name}`,

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
-import { PRODUCTS, productBySlug } from "@/config/store";
+import { productBySlug } from "@/config/store";
 import { createServiceClient } from "@/lib/supabase/service";
 
 export const runtime = "nodejs";
@@ -18,7 +18,6 @@ export async function POST(req: Request) {
   try {
     const body = (await req.json()) as { lines?: Line[]; customer_email?: string; mode?: "payment" | "subscription" };
     const lines = Array.isArray(body.lines) ? body.lines : [];
-    const supabase = createServiceClient();
     const origin = new URL(req.url).origin;
 
     if (body.mode === "subscription") {
@@ -40,6 +39,12 @@ export async function POST(req: Request) {
     if (lines.length === 0) {
       return NextResponse.json({ error: "empty_cart" }, { status: 400 });
     }
+
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      return NextResponse.json({ error: "supabase_not_configured" }, { status: 503 });
+    }
+
+    const supabase = createServiceClient();
 
     const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
     let subtotal = 0;

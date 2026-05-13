@@ -1,4 +1,3 @@
-import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
@@ -30,7 +29,7 @@ export async function POST(req: Request) {
   }
 
   const body = await req.text();
-  const sig = (await headers()).get("stripe-signature");
+  const sig = req.headers.get("stripe-signature");
   if (!sig) return NextResponse.json({ error: "no_signature" }, { status: 400 });
 
   let event: Stripe.Event;
@@ -39,6 +38,10 @@ export async function POST(req: Request) {
   } catch (err) {
     console.error("stripe webhook verify", err);
     return NextResponse.json({ error: "bad_signature" }, { status: 400 });
+  }
+
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return NextResponse.json({ error: "supabase_not_configured" }, { status: 503 });
   }
 
   const svc = createServiceClient();
