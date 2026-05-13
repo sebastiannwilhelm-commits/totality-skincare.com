@@ -10,6 +10,7 @@ import {
   ShopByConcernSection,
   TestimonialsSection,
 } from "@/components/home/marketing-sections";
+import { RecentlyViewedSection } from "@/components/recently-viewed-section";
 
 export default function HomePage() {
   return (
@@ -20,6 +21,7 @@ export default function HomePage() {
       <BestSellersSection />
       <ShopByBrandSection />
       <ShopByConcernSection />
+      <RecentlyViewedSection />
       <TestimonialsSection />
       <FounderSection />
     </main>

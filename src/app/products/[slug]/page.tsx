@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ProductActions } from "@/components/product-actions";
+import { RecentlyViewedTracker } from "@/components/recently-viewed-tracker";
 import { formatMoney, productBySlug, PRODUCTS } from "@/config/store";
 
 type Props = { params: { slug: string } };
@@ -23,6 +24,7 @@ export default function ProductPage({ params }: Props) {
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:py-14">
+      <RecentlyViewedTracker slug={p.slug} />
       <nav className="text-sm text-muted-foreground">
         <Link href="/" className="hover:underline">
           Home

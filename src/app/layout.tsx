@@ -5,6 +5,7 @@ import { CookieConsent } from "@/components/cookie-consent";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { CartProvider } from "@/context/cart-context";
+import { WishlistProvider } from "@/context/wishlist-context";
 import { SITE } from "@/config/store";
 
 import "./globals.css";
@@ -36,10 +37,12 @@ export default function RootLayout({
         className={`${inter.variable} ${cormorant.variable} min-h-screen bg-background font-sans antialiased`}
       >
         <CartProvider>
-          <SiteHeader />
-          {children}
-          <SiteFooter />
-          <CookieConsent />
+          <WishlistProvider>
+            <SiteHeader />
+            {children}
+            <SiteFooter />
+            <CookieConsent />
+          </WishlistProvider>
         </CartProvider>
       </body>
     </html>

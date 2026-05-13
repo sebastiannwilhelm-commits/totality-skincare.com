@@ -3,10 +3,11 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Menu, Search, ShoppingBag, X } from "lucide-react";
+import { Heart, Menu, Search, ShoppingBag, X } from "lucide-react";
 
 import { BRANDS, CONCERNS, LEGACY_STORE_URL, SITE } from "@/config/store";
 import { useCart } from "@/context/cart-context";
+import { useWishlist } from "@/context/wishlist-context";
 import { PRODUCTS } from "@/config/store";
 import { cn } from "@/lib/utils";
 
@@ -14,6 +15,7 @@ import { Button } from "./ui/button";
 
 export function SiteHeader() {
   const { count } = useCart();
+  const { count: wishCount } = useWishlist();
   const [open, setOpen] = React.useState(false);
   const [q, setQ] = React.useState("");
   const [searchOpen, setSearchOpen] = React.useState(false);
@@ -97,6 +99,15 @@ export function SiteHeader() {
             >
               Skin quiz
             </Link>
+            <Link href="/blogs/news" className="transition hover:text-[hsl(222,47%,18%)]">
+              Blog
+            </Link>
+            <Link href="/pages/track-order" className="transition hover:text-[hsl(222,47%,18%)]">
+              Track order
+            </Link>
+            <Link href="/pages/contact" className="transition hover:text-[hsl(222,47%,18%)]">
+              Contact
+            </Link>
             <Link href="/account" className="transition hover:text-[hsl(222,47%,18%)]">
               Account
             </Link>
@@ -109,6 +120,22 @@ export function SiteHeader() {
           </nav>
 
           <div className="flex items-center gap-1 sm:gap-2">
+            <Button
+              asChild
+              variant="ghost"
+              size="icon"
+              className="relative text-[hsl(222,47%,18%)]"
+              aria-label="Wishlist"
+            >
+              <Link href="/wishlist">
+                <Heart className="h-5 w-5" />
+                {wishCount > 0 ? (
+                  <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-200 px-1 text-[10px] font-semibold text-[hsl(222,47%,18%)]">
+                    {wishCount > 99 ? "99+" : wishCount}
+                  </span>
+                ) : null}
+              </Link>
+            </Button>
             <Button
               type="button"
               variant="ghost"
@@ -185,6 +212,17 @@ export function SiteHeader() {
                 ))
               )}
             </ul>
+            {q.trim() ? (
+              <div className="border-t pt-3 text-center">
+                <Link
+                  href={`/search?q=${encodeURIComponent(q.trim())}`}
+                  className="text-sm font-medium text-[hsl(222,47%,26%)] underline-offset-4 hover:underline"
+                  onClick={() => setSearchOpen(false)}
+                >
+                  View all results for &ldquo;{q.trim()}&rdquo;
+                </Link>
+              </div>
+            ) : null}
           </div>
         </div>
       ) : null}
@@ -220,6 +258,18 @@ export function SiteHeader() {
             </Link>
             <Link href="/account" onClick={() => setOpen(false)} className="rounded-md px-3 py-2 hover:bg-muted">
               Account
+            </Link>
+            <Link href="/blogs/news" onClick={() => setOpen(false)} className="rounded-md px-3 py-2 hover:bg-muted">
+              Blog
+            </Link>
+            <Link href="/pages/track-order" onClick={() => setOpen(false)} className="rounded-md px-3 py-2 hover:bg-muted">
+              Track order
+            </Link>
+            <Link href="/pages/contact" onClick={() => setOpen(false)} className="rounded-md px-3 py-2 hover:bg-muted">
+              Contact
+            </Link>
+            <Link href="/wishlist" onClick={() => setOpen(false)} className="rounded-md px-3 py-2 hover:bg-muted">
+              Wishlist
             </Link>
             <p className="px-3 pt-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Brands

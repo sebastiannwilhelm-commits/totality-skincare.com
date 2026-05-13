@@ -13,6 +13,9 @@ export const SITE = {
   facebook: "https://www.facebook.com/totalitymed/",
   freeShippingMinCents: 4000,
   legacyQuizUrl: `${LEGACY_STORE_URL}/pages/skin-care-quiz`,
+  /** Shopify Tracktor app — same entry customers use today. */
+  legacyOrderTrackingUrl: `${LEGACY_STORE_URL}/apps/tracktor/track`,
+  legacyBlogNewsUrl: `${LEGACY_STORE_URL}/blogs/news`,
   policies: {
     refund: `${LEGACY_STORE_URL}/policies/refund-policy`,
     privacy: `${LEGACY_STORE_URL}/policies/privacy-policy`,

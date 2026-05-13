@@ -34,6 +34,26 @@ export function SiteFooter() {
                   Skin care quiz
                 </Link>
               </li>
+              <li>
+                <Link href="/blogs/news" className="hover:underline">
+                  Blog
+                </Link>
+              </li>
+              <li>
+                <Link href="/wishlist" className="hover:underline">
+                  Wishlist
+                </Link>
+              </li>
+              <li>
+                <Link href="/pages/track-order" className="hover:underline">
+                  Track order
+                </Link>
+              </li>
+              <li>
+                <Link href="/search" className="hover:underline">
+                  Search
+                </Link>
+              </li>
             </ul>
           </div>
           <div>
@@ -41,6 +61,11 @@ export function SiteFooter() {
               Customer care
             </h3>
             <ul className="mt-3 space-y-2 text-sm">
+              <li>
+                <Link href="/pages/contact" className="hover:underline">
+                  Contact us
+                </Link>
+              </li>
               <li>
                 <a href={`mailto:${SITE.contactEmail}`} className="hover:underline">
                   {SITE.contactEmail}
@@ -64,6 +89,11 @@ export function SiteFooter() {
               <li>
                 <a href={SITE.policies.privacy} className="hover:underline" target="_blank" rel="noreferrer">
                   Privacy policy
+                </a>
+              </li>
+              <li>
+                <a href={SITE.policies.terms} className="hover:underline" target="_blank" rel="noreferrer">
+                  Terms of service
                 </a>
               </li>
             </ul>

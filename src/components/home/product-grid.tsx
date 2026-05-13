@@ -4,6 +4,8 @@ import Link from "next/link";
 import { formatMoney, PRODUCTS } from "@/config/store";
 import type { StoreProduct } from "@/lib/types";
 
+import { WishlistHeartButton } from "@/components/wishlist-heart-button";
+
 import { ProductAddButton } from "./product-add-button";
 
 export function ProductCard({ product }: { product: StoreProduct }) {
@@ -28,8 +30,11 @@ export function ProductCard({ product }: { product: StoreProduct }) {
           {product.name}
         </Link>
         <p className="mt-2 text-sm font-semibold">{formatMoney(product.priceCents)}</p>
-        <div className="mt-4">
-          <ProductAddButton product={product} />
+        <div className="mt-4 flex gap-2">
+          <div className="min-w-0 flex-1">
+            <ProductAddButton product={product} />
+          </div>
+          <WishlistHeartButton slug={product.slug} className="h-10 w-10" />
         </div>
       </div>
     </article>

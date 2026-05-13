@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
+import { WishlistHeartButton } from "@/components/wishlist-heart-button";
 import { useCart } from "@/context/cart-context";
 import type { StoreProduct } from "@/lib/types";
 
@@ -25,7 +26,8 @@ export function ProductActions({ product }: { product: StoreProduct }) {
   }
 
   return (
-    <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
       <div>
         <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Qty</span>
         <div className="mt-1 flex h-11 w-32 items-center justify-between rounded-md border bg-white">
@@ -54,6 +56,11 @@ export function ProductActions({ product }: { product: StoreProduct }) {
       <Button asChild variant="outline" className="h-11 sm:min-w-[10rem]">
         <Link href="/cart">View cart</Link>
       </Button>
+      </div>
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <WishlistHeartButton slug={product.slug} className="h-9 w-9" />
+        <span>Save to wishlist</span>
+      </div>
     </div>
   );
 }

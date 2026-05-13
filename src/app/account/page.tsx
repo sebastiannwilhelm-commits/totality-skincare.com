@@ -25,6 +25,18 @@ export default function AccountPage() {
         <Button asChild variant="ghost">
           <Link href="/shop">Shop</Link>
         </Button>
+        <Button asChild variant="ghost">
+          <Link href="/wishlist">Wishlist</Link>
+        </Button>
+        <Button asChild variant="ghost">
+          <Link href="/pages/track-order">Track order</Link>
+        </Button>
+        <Button asChild variant="ghost">
+          <Link href="/blogs/news">Blog</Link>
+        </Button>
+        <Button asChild variant="ghost">
+          <Link href="/pages/contact">Contact</Link>
+        </Button>
       </div>
     </main>
   );

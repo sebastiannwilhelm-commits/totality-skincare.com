@@ -106,8 +106,9 @@ export const TOT_SKINCARE_PARITY: ParityRow[] = [
   {
     id: "order-tracking",
     liveSource: "Tracktor / Flits order tracking links",
-    status: "planned",
-    notes: "Use order status page + carrier tracking after Shippo integration.",
+    status: "partial",
+    notes:
+      "Route /pages/track-order links to the live Shopify Tracktor URL; native tracking after Shippo + orders API.",
   },
   {
     id: "subscriptions",
@@ -118,8 +119,32 @@ export const TOT_SKINCARE_PARITY: ParityRow[] = [
   {
     id: "wishlist",
     liveSource: "Wishlist (Flits — may be off on live plan)",
-    status: "planned",
-    notes: "Optional: Supabase wishlist table + UI.",
+    status: "partial",
+    notes: "Heart on cards + /wishlist; localStorage until Supabase per-user wishlists.",
+  },
+  {
+    id: "blog",
+    liveSource: "/blogs/news",
+    status: "partial",
+    notes: "Hub at /blogs/news opens the live Shopify blog until content is migrated.",
+  },
+  {
+    id: "contact-page",
+    liveSource: "Contact / support",
+    status: "partial",
+    notes: "Route /pages/contact + /api/contact stub; connect to helpdesk or Resend routing.",
+  },
+  {
+    id: "search-url",
+    liveSource: "Search results page (e.g. /search?q=)",
+    status: "done",
+    notes: "Dedicated /search plus header modal deep link to view all results.",
+  },
+  {
+    id: "recently-viewed",
+    liveSource: "Recently viewed products (Flits)",
+    status: "partial",
+    notes: "Home section + PDP tracker via localStorage; sync to account when Auth ships.",
   },
   {
     id: "policies",
