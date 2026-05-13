@@ -3,7 +3,7 @@
 import type { StoreProduct } from "@/lib/types";
 import { useCart } from "@/context/cart-context";
 
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 
 export function ProductAddButton({ product }: { product: StoreProduct }) {
   const { add } = useCart();
