@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Cormorant_Garamond, Inter } from "next/font/google";
 
 import { CookieConsent } from "@/components/cookie-consent";
+import { LeadCapturePopup } from "@/components/lead-capture-popup";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { CartProvider } from "@/context/cart-context";
@@ -42,6 +43,7 @@ export default function RootLayout({
             {children}
             <SiteFooter />
             <CookieConsent />
+            <LeadCapturePopup />
           </WishlistProvider>
         </CartProvider>
       </body>

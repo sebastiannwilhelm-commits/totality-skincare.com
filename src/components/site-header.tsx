@@ -108,6 +108,9 @@ export function SiteHeader() {
             <Link href="/pages/contact" className="transition hover:text-[hsl(222,47%,18%)]">
               Contact
             </Link>
+            <Link href="/auth/login" className="transition hover:text-[hsl(222,47%,18%)]">
+              Sign in
+            </Link>
             <Link href="/account" className="transition hover:text-[hsl(222,47%,18%)]">
               Account
             </Link>
@@ -255,6 +258,9 @@ export function SiteHeader() {
               className="rounded-md px-3 py-2 hover:bg-muted"
             >
               Skin quiz
+            </Link>
+            <Link href="/auth/login" onClick={() => setOpen(false)} className="rounded-md px-3 py-2 hover:bg-muted">
+              Sign in
             </Link>
             <Link href="/account" onClick={() => setOpen(false)} className="rounded-md px-3 py-2 hover:bg-muted">
               Account

@@ -50,6 +50,11 @@ export function SiteFooter() {
                 </Link>
               </li>
               <li>
+                <Link href="/subscribe" className="hover:underline">
+                  Subscribe &amp; save
+                </Link>
+              </li>
+              <li>
                 <Link href="/search" className="hover:underline">
                   Search
                 </Link>
