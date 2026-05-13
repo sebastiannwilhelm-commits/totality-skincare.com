@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
-import { formatMoney, productBySlug } from "@/config/store";
+import { formatMoney, productBySlug, SITE } from "@/config/store";
 import { useCart } from "@/context/cart-context";
 
 export default function CartPage() {
@@ -74,6 +74,16 @@ export default function CartPage() {
       )}
       {rows.length > 0 ? (
         <div className="mt-8 border-t pt-6">
+          {subtotal < SITE.freeShippingMinCents ? (
+            <p className="mb-4 rounded-md border border-[hsl(350,40%,88%)] bg-[hsl(350,85%,97%)] px-3 py-2 text-sm text-[hsl(222,47%,22%)]">
+              Add {formatMoney(SITE.freeShippingMinCents - subtotal)} more for free shipping on orders{" "}
+              {formatMoney(SITE.freeShippingMinCents)}+.
+            </p>
+          ) : (
+            <p className="mb-4 text-sm font-medium text-green-800">
+              You qualify for free shipping ({formatMoney(SITE.freeShippingMinCents)}+).
+            </p>
+          )}
           <div className="flex justify-between text-base font-semibold">
             <span>Subtotal</span>
             <span>{formatMoney(subtotal)}</span>
