@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { SITE, formatMoney } from "@/config/store";
 
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
 
 export function PromoBar() {
   return (
