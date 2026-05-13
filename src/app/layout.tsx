@@ -1,12 +1,28 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Cormorant_Garamond, Inter } from "next/font/google";
+
+import { CookieConsent } from "@/components/cookie-consent";
+import { SiteFooter } from "@/components/site-footer";
+import { SiteHeader } from "@/components/site-header";
+import { CartProvider } from "@/context/cart-context";
+import { SITE } from "@/config/store";
+
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
+const cormorant = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  variable: "--font-serif",
+});
 
 export const metadata: Metadata = {
-  title: "Palmetto Developments Storefront",
-  description: "Custom storefront for Totality Skincare (totality-skincare.com).",
+  title: {
+    default: `${SITE.name} | Medical-grade skincare`,
+    template: `%s | ${SITE.name}`,
+  },
+  description:
+    "Medical-grade and prescription skincare curated by Dr. Nicole Nadel — same experience as totality-skincare.com, rebuilt on Next.js + Supabase.",
 };
 
 export default function RootLayout({
@@ -16,8 +32,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} min-h-screen font-sans antialiased`}>
-        {children}
+      <body
+        className={`${inter.variable} ${cormorant.variable} min-h-screen bg-background font-sans antialiased`}
+      >
+        <CartProvider>
+          <SiteHeader />
+          {children}
+          <SiteFooter />
+          <CookieConsent />
+        </CartProvider>
       </body>
     </html>
   );
