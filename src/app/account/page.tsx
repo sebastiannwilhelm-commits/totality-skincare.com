@@ -16,58 +16,65 @@ type CustomerSubscriptionRow = {
 };
 
 export default async function AccountPage() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
-  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
-  if (!url || !anon) {
+  const hasPublicSupabase =
+    Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()) &&
+    Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim());
+  if (!hasPublicSupabase) {
     redirect("/auth/login?next=/account&error=config");
   }
 
   let supabase;
   try {
     supabase = await createClient();
-  } catch (e) {
-    console.error("[account] createClient", e);
-    redirect("/auth/login?next=/account&error=server");
+  } catch {
+    redirect("/auth/login?next=/account&error=config");
   }
 
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
-
+  const { data: authData, error: authError } = await supabase.auth.getUser();
   if (authError) {
-    console.error("[account] auth.getUser", authError.message);
     redirect("/auth/login?next=/account&error=session");
   }
+  const user = authData.user;
   if (!user) {
     redirect("/auth/login?next=/account");
   }
 
-  const { data: customer } = await supabase
-    .from("customers")
-    .select("id, email, full_name, stripe_customer_id")
-    .eq("user_id", user.id)
-    .maybeSingle();
+  type CustomerRow = { id: string; email: string; full_name: string | null; stripe_customer_id: string | null };
+  let customer: CustomerRow | null = null;
+  let loyalty: { data: { points_balance: number } | null } = { data: null };
+  let subs: { data: CustomerSubscriptionRow[] } = { data: [] };
+  let orders: { data: { id: string; status: string; total_cents: number; created_at: string }[] } = { data: [] };
 
-  const loyalty = customer
-    ? await supabase.from("loyalty_accounts").select("points_balance").eq("customer_id", customer.id).maybeSingle()
-    : { data: null as { points_balance: number } | null };
-
-  const subs = customer
-    ? await supabase
-        .from("customer_subscriptions")
-        .select("id, status, stripe_subscription_id, current_period_end")
-        .eq("customer_id", customer.id)
-    : { data: [] as CustomerSubscriptionRow[] };
-
-  const orders = customer
-    ? await supabase
-        .from("orders")
-        .select("id, status, total_cents, created_at")
-        .eq("customer_id", customer.id)
-        .order("created_at", { ascending: false })
-        .limit(10)
-    : { data: [] as { id: string; status: string; total_cents: number; created_at: string }[] };
+  try {
+    const { data: row, error: custErr } = await supabase
+      .from("customers")
+      .select("id, email, full_name, stripe_customer_id")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (!custErr && row) {
+      customer = row as CustomerRow;
+      const [loyaltyRes, subsRes, ordersRes] = await Promise.all([
+        supabase.from("loyalty_accounts").select("points_balance").eq("customer_id", customer.id).maybeSingle(),
+        supabase
+          .from("customer_subscriptions")
+          .select("id, status, stripe_subscription_id, current_period_end")
+          .eq("customer_id", customer.id),
+        supabase
+          .from("orders")
+          .select("id, status, total_cents, created_at")
+          .eq("customer_id", customer.id)
+          .order("created_at", { ascending: false })
+          .limit(10),
+      ]);
+      loyalty = loyaltyRes;
+      subs = { data: (subsRes.data ?? []) as CustomerSubscriptionRow[] };
+      orders = {
+        data: (ordersRes.data ?? []) as { id: string; status: string; total_cents: number; created_at: string }[],
+      };
+    }
+  } catch {
+    /* migrations / RLS / network — still show signed-in shell */
+  }
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-12 sm:px-6">
@@ -135,7 +142,7 @@ export default async function AccountPage() {
             {(orders.data ?? []).map((o) => (
               <li key={o.id} className="flex justify-between gap-2 border-b border-border pb-2 last:border-0">
                 <span className="capitalize">{o.status.replace(/_/g, " ")}</span>
-                <span>{(o.total_cents / 100).toLocaleString("en-US", { style: "currency", currency: "USD" })}</span>
+                <span>{((o.total_cents ?? 0) / 100).toLocaleString("en-US", { style: "currency", currency: "USD" })}</span>
               </li>
             ))}
           </ul>
