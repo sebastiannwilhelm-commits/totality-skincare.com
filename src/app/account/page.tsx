@@ -16,10 +16,29 @@ type CustomerSubscriptionRow = {
 };
 
 export default async function AccountPage() {
-  const supabase = await createClient();
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
+  if (!url || !anon) {
+    redirect("/auth/login?next=/account&error=config");
+  }
+
+  let supabase;
+  try {
+    supabase = await createClient();
+  } catch (e) {
+    console.error("[account] createClient", e);
+    redirect("/auth/login?next=/account&error=server");
+  }
+
   const {
     data: { user },
+    error: authError,
   } = await supabase.auth.getUser();
+
+  if (authError) {
+    console.error("[account] auth.getUser", authError.message);
+    redirect("/auth/login?next=/account&error=session");
+  }
   if (!user) {
     redirect("/auth/login?next=/account");
   }
