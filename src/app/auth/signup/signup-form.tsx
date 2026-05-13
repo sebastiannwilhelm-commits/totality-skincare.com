@@ -21,7 +21,16 @@ export function SignupForm() {
     setLoading(true);
     setError(null);
     setMsg(null);
-    const supabase = createClient();
+    let supabase;
+    try {
+      supabase = createClient();
+    } catch {
+      setError(
+        "Sign-up is not configured on this site. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in the host environment.",
+      );
+      setLoading(false);
+      return;
+    }
     const origin = window.location.origin;
     const { data, error: err } = await supabase.auth.signUp({
       email,
