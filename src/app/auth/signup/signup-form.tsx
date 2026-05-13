@@ -4,10 +4,11 @@ import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { SupabaseSetupNotice } from "@/components/supabase-setup-notice";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 
-export function SignupForm() {
+export function SignupForm({ authConfigured }: { authConfigured: boolean }) {
   const router = useRouter();
   const [fullName, setFullName] = React.useState("");
   const [email, setEmail] = React.useState("");
@@ -18,6 +19,10 @@ export function SignupForm() {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!authConfigured) {
+      setError("Add Supabase URL and anon key to the environment, then restart the app.");
+      return;
+    }
     setLoading(true);
     setError(null);
     setMsg(null);
@@ -46,6 +51,7 @@ export function SignupForm() {
 
   return (
     <form onSubmit={onSubmit} className="mx-auto max-w-sm space-y-4">
+      {!authConfigured ? <SupabaseSetupNotice variant="auth" className="mb-2" /> : null}
       <div>
         <label className="text-sm font-medium" htmlFor="name">
           Full name
@@ -54,7 +60,8 @@ export function SignupForm() {
           id="name"
           autoComplete="name"
           required
-          className="mt-1 h-11 w-full rounded-md border border-input bg-white px-3 text-sm"
+          disabled={!authConfigured}
+          className="mt-1 h-11 w-full rounded-md border border-input bg-white px-3 text-sm disabled:cursor-not-allowed disabled:opacity-60"
           value={fullName}
           onChange={(e) => setFullName(e.target.value)}
         />
@@ -68,7 +75,8 @@ export function SignupForm() {
           type="email"
           autoComplete="email"
           required
-          className="mt-1 h-11 w-full rounded-md border border-input bg-white px-3 text-sm"
+          disabled={!authConfigured}
+          className="mt-1 h-11 w-full rounded-md border border-input bg-white px-3 text-sm disabled:cursor-not-allowed disabled:opacity-60"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
@@ -83,14 +91,15 @@ export function SignupForm() {
           autoComplete="new-password"
           required
           minLength={8}
-          className="mt-1 h-11 w-full rounded-md border border-input bg-white px-3 text-sm"
+          disabled={!authConfigured}
+          className="mt-1 h-11 w-full rounded-md border border-input bg-white px-3 text-sm disabled:cursor-not-allowed disabled:opacity-60"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
       </div>
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
       {msg ? <p className="text-sm text-green-800">{msg}</p> : null}
-      <Button type="submit" className="w-full" variant="blush" disabled={loading}>
+      <Button type="submit" className="w-full" variant="blush" disabled={loading || !authConfigured}>
         {loading ? "Creating…" : "Create account"}
       </Button>
       <p className="text-center text-sm text-muted-foreground">

@@ -1,8 +1,12 @@
 import { redirect } from "next/navigation";
 
+import { isSupabasePublicConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 
 export async function requireAdminUser() {
+  if (!isSupabasePublicConfigured()) {
+    redirect("/?notice=supabase_required");
+  }
   const supabase = await createClient();
   const {
     data: { user },

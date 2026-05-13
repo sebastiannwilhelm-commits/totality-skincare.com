@@ -1,10 +1,20 @@
 import Link from "next/link";
 
+import { SupabaseSetupNoticeDark } from "@/components/supabase-setup-notice";
 import { requireAdminUser } from "@/lib/auth/admin";
+import { isSupabasePublicConfigured } from "@/lib/supabase/config";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  if (!isSupabasePublicConfigured()) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[hsl(222,47%,8%)] p-6">
+        <SupabaseSetupNoticeDark variant="admin" />
+      </div>
+    );
+  }
+
   const user = await requireAdminUser();
 
   return (

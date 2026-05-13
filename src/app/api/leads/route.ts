@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { isSupabaseServiceConfigured } from "@/lib/supabase/config";
 import { createServiceClient } from "@/lib/supabase/service";
 
 type Body = {
@@ -18,6 +19,10 @@ export async function POST(req: Request) {
     const body = (await req.json()) as Body;
     if (!body.email || typeof body.email !== "string") {
       return NextResponse.json({ ok: false, error: "email_required" }, { status: 400 });
+    }
+
+    if (!isSupabaseServiceConfigured()) {
+      return NextResponse.json({ ok: false, error: "supabase_not_configured" }, { status: 503 });
     }
 
     const supabase = createServiceClient();

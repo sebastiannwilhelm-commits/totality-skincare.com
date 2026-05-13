@@ -14,7 +14,7 @@ export function LeadCapturePopup() {
   const [open, setOpen] = React.useState(false);
   const [first, setFirst] = React.useState("");
   const [email, setEmail] = React.useState("");
-  const [status, setStatus] = React.useState<"idle" | "loading" | "ok" | "err">("idle");
+  const [status, setStatus] = React.useState<"idle" | "loading" | "ok" | "err" | "err_config">("idle");
 
   const blocked =
     !pathname ||
@@ -63,11 +63,22 @@ export function LeadCapturePopup() {
           page_url: typeof window !== "undefined" ? window.location.href : null,
         }),
       });
-      if (!res.ok) throw new Error();
+      const data = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string };
+      if (!res.ok) {
+        if (res.status === 503 && data.error === "supabase_not_configured") {
+          throw new Error("config");
+        }
+        throw new Error("save");
+      }
+      if (!data.ok) throw new Error("save");
       setStatus("ok");
       dismiss(14);
-    } catch {
-      setStatus("err");
+    } catch (err) {
+      if (err instanceof Error && err.message === "config") {
+        setStatus("err_config");
+      } else {
+        setStatus("err");
+      }
     }
   }
 
@@ -133,6 +144,11 @@ export function LeadCapturePopup() {
             {status === "loading" ? "Joining…" : "Sign up"}
           </Button>
           {status === "ok" ? <p className="text-center text-sm text-green-700">You&apos;re in — thank you!</p> : null}
+          {status === "err_config" ? (
+            <p className="text-center text-sm text-muted-foreground">
+              This signup needs Supabase configured on the server (URL + service role key). You can still browse the shop.
+            </p>
+          ) : null}
           {status === "err" ? (
             <p className="text-center text-sm text-destructive">Could not save. Try again later.</p>
           ) : null}

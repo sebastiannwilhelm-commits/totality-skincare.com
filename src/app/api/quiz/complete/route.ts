@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { isSupabaseServiceConfigured } from "@/lib/supabase/config";
 import { createServiceClient } from "@/lib/supabase/service";
 
 export async function POST(req: Request) {
@@ -10,6 +11,10 @@ export async function POST(req: Request) {
       recommended_slugs?: string[];
       user_id?: string | null;
     };
+
+    if (!isSupabaseServiceConfigured()) {
+      return NextResponse.json({ ok: false, error: "supabase_not_configured" }, { status: 503 });
+    }
 
     const supabase = createServiceClient();
     const { error } = await supabase.from("quiz_sessions").insert({

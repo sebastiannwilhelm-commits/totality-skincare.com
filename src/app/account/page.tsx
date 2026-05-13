@@ -2,8 +2,9 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { AccountPortalButton } from "@/components/account-portal-button";
+import { SupabaseSetupNotice } from "@/components/supabase-setup-notice";
 import { Button } from "@/components/ui/button";
-import { createClient } from "@/lib/supabase/server";
+import { createClientIfConfigured } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +17,18 @@ type CustomerSubscriptionRow = {
 };
 
 export default async function AccountPage() {
-  const supabase = await createClient();
+  const supabase = await createClientIfConfigured();
+  if (!supabase) {
+    return (
+      <main className="mx-auto max-w-2xl px-4 py-12 sm:px-6">
+        <h1 className="font-serif text-3xl font-semibold text-[hsl(222,47%,18%)]">Account</h1>
+        <div className="mt-8">
+          <SupabaseSetupNotice variant="account" />
+        </div>
+      </main>
+    );
+  }
+
   const {
     data: { user },
   } = await supabase.auth.getUser();

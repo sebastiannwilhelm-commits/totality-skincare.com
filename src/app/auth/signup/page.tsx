@@ -1,10 +1,13 @@
 import { Suspense } from "react";
 
+import { isSupabasePublicConfigured } from "@/lib/supabase/config";
+
 import { SignupForm } from "./signup-form";
 
 export const metadata = { title: "Create account" };
 
 export default function SignupPage() {
+  const authConfigured = isSupabasePublicConfigured();
   return (
     <main className="mx-auto max-w-lg px-4 py-16 sm:px-6">
       <h1 className="font-serif text-3xl font-semibold text-[hsl(222,47%,18%)]">Create account</h1>
@@ -13,7 +16,7 @@ export default function SignupPage() {
       </p>
       <div className="mt-8">
         <Suspense>
-          <SignupForm />
+          <SignupForm authConfigured={authConfigured} />
         </Suspense>
       </div>
     </main>

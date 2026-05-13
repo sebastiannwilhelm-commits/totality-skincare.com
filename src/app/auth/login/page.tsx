@@ -1,11 +1,14 @@
 import Link from "next/link";
 import { Suspense } from "react";
 
+import { isSupabasePublicConfigured } from "@/lib/supabase/config";
+
 import { LoginForm } from "./login-form";
 
 export const metadata = { title: "Sign in" };
 
 export default function LoginPage() {
+  const authConfigured = isSupabasePublicConfigured();
   return (
     <main className="mx-auto max-w-lg px-4 py-16 sm:px-6">
       <h1 className="font-serif text-3xl font-semibold text-[hsl(222,47%,18%)]">Sign in</h1>
@@ -18,7 +21,7 @@ export default function LoginPage() {
       </p>
       <div className="mt-8">
         <Suspense fallback={<p className="text-sm text-muted-foreground">Loading…</p>}>
-          <LoginForm />
+          <LoginForm authConfigured={authConfigured} />
         </Suspense>
       </div>
     </main>
