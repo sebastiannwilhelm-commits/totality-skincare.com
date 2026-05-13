@@ -1,9 +1,5 @@
-import {
-  BestSellersSection,
-  HomeHero,
-  PromoBar,
-  TrustShippingStrip,
-} from "@/components/home/hero-sections";
+import { BestSellersSection } from "@/components/home/product-grid";
+import { HomeHero, PromoBar, TrustShippingStrip } from "@/components/home/hero-sections";
 import {
   FounderSection,
   ShopByBrandSection,

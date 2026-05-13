@@ -22,7 +22,7 @@ function read(): string[] {
     if (!raw) return [];
     const parsed = JSON.parse(raw) as unknown;
     if (!Array.isArray(parsed)) return [];
-    return parsed.filter((s): s is string => typeof s === "string" && productBySlug(s));
+    return parsed.filter((s): s is string => typeof s === "string" && productBySlug(s) !== undefined);
   } catch {
     return [];
   }

@@ -9,6 +9,12 @@ export const dynamic = "force-dynamic";
 
 export const metadata = { title: "Account" };
 
+type CustomerSubscriptionRow = {
+  id: string;
+  status: string;
+  stripe_subscription_id: string;
+};
+
 export default async function AccountPage() {
   const supabase = await createClient();
   const {
@@ -33,7 +39,7 @@ export default async function AccountPage() {
         .from("customer_subscriptions")
         .select("id, status, stripe_subscription_id, current_period_end")
         .eq("customer_id", customer.id)
-    : { data: [] as unknown[] };
+    : { data: [] as CustomerSubscriptionRow[] };
 
   const orders = customer
     ? await supabase
@@ -82,7 +88,7 @@ export default async function AccountPage() {
           </p>
         ) : (
           <ul className="mt-3 space-y-2 text-sm">
-            {(subs.data ?? []).map((s: { id: string; status: string; stripe_subscription_id: string }) => (
+            {(subs.data ?? []).map((s) => (
               <li key={s.id} className="flex justify-between gap-2">
                 <span>{s.status}</span>
                 <span className="truncate text-xs text-muted-foreground">{s.stripe_subscription_id}</span>
