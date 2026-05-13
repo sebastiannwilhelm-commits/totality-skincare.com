@@ -11,6 +11,7 @@ import { useWishlist } from "@/context/wishlist-context";
 import { PRODUCTS } from "@/config/store";
 import { cn } from "@/lib/utils";
 
+import { AccountNavWhenSignedIn } from "@/components/account-nav-when-signed-in";
 import { Button } from "@/components/ui/button";
 
 export function SiteHeader() {
@@ -129,12 +130,7 @@ export function SiteHeader() {
             >
               Sign in
             </Link>
-            <Link
-              href="/account"
-              className="relative z-10 shrink-0 whitespace-nowrap transition hover:text-[hsl(222,47%,18%)]"
-            >
-              Account
-            </Link>
+            <AccountNavWhenSignedIn className="relative z-10 shrink-0 whitespace-nowrap transition hover:text-[hsl(222,47%,18%)]" />
             <a
               href={LEGACY_STORE_URL}
               className="shrink-0 whitespace-nowrap text-xs font-normal text-muted-foreground transition hover:text-foreground"
@@ -283,9 +279,10 @@ export function SiteHeader() {
             <Link href="/auth/login" onClick={() => setOpen(false)} className="rounded-md px-3 py-2 hover:bg-muted">
               Sign in
             </Link>
-            <Link href="/account" onClick={() => setOpen(false)} className="rounded-md px-3 py-2 hover:bg-muted">
-              Account
-            </Link>
+            <AccountNavWhenSignedIn
+              onClick={() => setOpen(false)}
+              className="rounded-md px-3 py-2 hover:bg-muted"
+            />
             <Link href="/blogs/news" onClick={() => setOpen(false)} className="rounded-md px-3 py-2 hover:bg-muted">
               Blog
             </Link>
