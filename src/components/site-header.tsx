@@ -11,7 +11,7 @@ import { useWishlist } from "@/context/wishlist-context";
 import { PRODUCTS } from "@/config/store";
 import { cn } from "@/lib/utils";
 
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
 
 export function SiteHeader() {
   const { count } = useCart();

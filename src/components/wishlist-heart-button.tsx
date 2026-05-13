@@ -4,7 +4,7 @@ import { Heart } from "lucide-react";
 
 import { useWishlist } from "@/context/wishlist-context";
 
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export function WishlistHeartButton({
