@@ -50,18 +50,21 @@ export function SiteHeader() {
             </span>
           </Link>
 
-          <nav className="hidden flex-1 items-center justify-center gap-6 text-sm font-medium text-[hsl(222,30%,32%)] lg:flex">
-            <Link href="/shop" className="transition hover:text-[hsl(222,47%,18%)]">
+          <nav className="hidden min-w-0 flex-1 flex-nowrap items-center justify-center gap-4 text-sm font-medium text-[hsl(222,30%,32%)] xl:gap-6 lg:flex">
+            <Link
+              href="/shop"
+              className="shrink-0 whitespace-nowrap transition hover:text-[hsl(222,47%,18%)]"
+            >
               Shop all
             </Link>
-            <div className="group relative">
+            <div className="group relative shrink-0">
               <button
                 type="button"
-                className="flex items-center gap-1 transition hover:text-[hsl(222,47%,18%)]"
+                className="flex items-center gap-1 whitespace-nowrap transition hover:text-[hsl(222,47%,18%)]"
               >
                 Brands
               </button>
-              <div className="invisible absolute left-0 top-full z-50 pt-2 opacity-0 transition group-hover:visible group-hover:opacity-100">
+              <div className="pointer-events-none invisible absolute left-0 top-full z-50 pt-2 opacity-0 transition group-hover:pointer-events-auto group-hover:visible group-hover:opacity-100">
                 <div className="min-w-[12rem] rounded-md border bg-white py-2 shadow-lg">
                   {BRANDS.map((b) => (
                     <Link
@@ -75,11 +78,14 @@ export function SiteHeader() {
                 </div>
               </div>
             </div>
-            <div className="group relative">
-              <button type="button" className="transition hover:text-[hsl(222,47%,18%)]">
+            <div className="group relative shrink-0">
+              <button
+                type="button"
+                className="whitespace-nowrap transition hover:text-[hsl(222,47%,18%)]"
+              >
                 Concerns
               </button>
-              <div className="invisible absolute left-0 top-full z-50 pt-2 opacity-0 transition group-hover:visible group-hover:opacity-100">
+              <div className="pointer-events-none invisible absolute left-0 top-full z-50 pt-2 opacity-0 transition group-hover:pointer-events-auto group-hover:visible group-hover:opacity-100">
                 <div className="min-w-[14rem] rounded-md border bg-white py-2 shadow-lg">
                   {CONCERNS.map((c) => (
                     <Link
@@ -95,28 +101,43 @@ export function SiteHeader() {
             </div>
             <Link
               href="/pages/skin-care-quiz"
-              className="transition hover:text-[hsl(222,47%,18%)]"
+              className="shrink-0 whitespace-nowrap transition hover:text-[hsl(222,47%,18%)]"
             >
               Skin quiz
             </Link>
-            <Link href="/blogs/news" className="transition hover:text-[hsl(222,47%,18%)]">
+            <Link
+              href="/blogs/news"
+              className="shrink-0 whitespace-nowrap transition hover:text-[hsl(222,47%,18%)]"
+            >
               Blog
             </Link>
-            <Link href="/pages/track-order" className="transition hover:text-[hsl(222,47%,18%)]">
+            <Link
+              href="/pages/track-order"
+              className="shrink-0 whitespace-nowrap transition hover:text-[hsl(222,47%,18%)]"
+            >
               Track order
             </Link>
-            <Link href="/pages/contact" className="transition hover:text-[hsl(222,47%,18%)]">
+            <Link
+              href="/pages/contact"
+              className="shrink-0 whitespace-nowrap transition hover:text-[hsl(222,47%,18%)]"
+            >
               Contact
             </Link>
-            <Link href="/auth/login" className="transition hover:text-[hsl(222,47%,18%)]">
+            <Link
+              href="/auth/login"
+              className="shrink-0 whitespace-nowrap transition hover:text-[hsl(222,47%,18%)]"
+            >
               Sign in
             </Link>
-            <Link href="/account" className="transition hover:text-[hsl(222,47%,18%)]">
+            <Link
+              href="/account"
+              className="relative z-10 shrink-0 whitespace-nowrap transition hover:text-[hsl(222,47%,18%)]"
+            >
               Account
             </Link>
             <a
               href={LEGACY_STORE_URL}
-              className="text-xs font-normal text-muted-foreground transition hover:text-foreground"
+              className="shrink-0 whitespace-nowrap text-xs font-normal text-muted-foreground transition hover:text-foreground"
             >
               Legacy store
             </a>
