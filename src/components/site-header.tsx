@@ -11,7 +11,11 @@ import { useWishlist } from "@/context/wishlist-context";
 import { PRODUCTS } from "@/config/store";
 import { cn } from "@/lib/utils";
 
-import { AccountNavWhenSignedIn } from "@/components/account-nav-when-signed-in";
+import {
+  HeaderSupabaseAuthDesktop,
+  HeaderSupabaseAuthDrawer,
+  HeaderSupabaseAuthProvider,
+} from "@/components/header-supabase-auth";
 import { Button } from "@/components/ui/button";
 
 export function SiteHeader() {
@@ -33,7 +37,8 @@ export function SiteHeader() {
   }, [q]);
 
   return (
-    <>
+    <HeaderSupabaseAuthProvider>
+      <>
       <header className="sticky top-0 z-40 border-b border-[hsl(350,30%,88%)] bg-white/90 backdrop-blur-md">
         <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4 sm:h-16 sm:px-6">
           <button
@@ -124,19 +129,7 @@ export function SiteHeader() {
             >
               Contact
             </Link>
-            <Link
-              href="/auth/login"
-              className="shrink-0 whitespace-nowrap transition hover:text-[hsl(222,47%,18%)]"
-            >
-              Sign in
-            </Link>
-            <Link
-              href="/auth/signup"
-              className="shrink-0 whitespace-nowrap transition hover:text-[hsl(222,47%,18%)]"
-            >
-              Sign up
-            </Link>
-            <AccountNavWhenSignedIn className="relative z-10 shrink-0 whitespace-nowrap transition hover:text-[hsl(222,47%,18%)]" />
+            <HeaderSupabaseAuthDesktop />
             <a
               href={LEGACY_STORE_URL}
               className="shrink-0 whitespace-nowrap text-xs font-normal text-muted-foreground transition hover:text-foreground"
@@ -282,16 +275,7 @@ export function SiteHeader() {
             >
               Skin quiz
             </Link>
-            <Link href="/auth/login" onClick={() => setOpen(false)} className="rounded-md px-3 py-2 hover:bg-muted">
-              Sign in
-            </Link>
-            <Link href="/auth/signup" onClick={() => setOpen(false)} className="rounded-md px-3 py-2 hover:bg-muted">
-              Sign up
-            </Link>
-            <AccountNavWhenSignedIn
-              onClick={() => setOpen(false)}
-              className="rounded-md px-3 py-2 hover:bg-muted"
-            />
+            <HeaderSupabaseAuthDrawer onLinkClick={() => setOpen(false)} />
             <Link href="/blogs/news" onClick={() => setOpen(false)} className="rounded-md px-3 py-2 hover:bg-muted">
               Blog
             </Link>
@@ -333,6 +317,7 @@ export function SiteHeader() {
           </nav>
         </div>
       </div>
-    </>
+      </>
+    </HeaderSupabaseAuthProvider>
   );
 }
