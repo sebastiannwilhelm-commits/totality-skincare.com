@@ -14,12 +14,13 @@ type SignupFormProps = {
 };
 
 export function SignupForm({ supabaseConfigured }: SignupFormProps) {
+  void supabaseConfigured;
   const searchParams = useSearchParams();
   const next = safeNextPath(searchParams.get("next"));
   const urlError = searchParams.get("error");
   const [clientConfigured, setClientConfigured] = React.useState<boolean | null>(null);
-  const resolvedConfigured = clientConfigured ?? supabaseConfigured;
-  const configMessage = !resolvedConfigured || urlError === "config" ? SUPABASE_PUBLIC_ENV_HELP : null;
+  const resolvedConfigured = clientConfigured !== false;
+  const configMessage = clientConfigured === false || urlError === "config" ? SUPABASE_PUBLIC_ENV_HELP : null;
 
   const [fullName, setFullName] = React.useState("");
   const [email, setEmail] = React.useState("");
@@ -81,7 +82,7 @@ export function SignupForm({ supabaseConfigured }: SignupFormProps) {
     setMsg("Check your email to confirm your account, then sign in.");
   }
 
-  const fieldDisabled = !resolvedConfigured;
+  const fieldDisabled = clientConfigured === false;
 
   return (
     <form onSubmit={onSubmit} className="mx-auto max-w-sm space-y-4">
