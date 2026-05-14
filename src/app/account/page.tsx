@@ -1,79 +1,76 @@
+"use client";
+
+import * as React from "react";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { onAuthStateChanged, signOut, type User } from "firebase/auth";
 
-import { AccountPortalButton } from "@/components/account-portal-button";
 import { Button } from "@/components/ui/button";
-import { createClient } from "@/lib/supabase/server";
+import { FIREBASE_PUBLIC_ENV_HELP } from "@/lib/firebase/config-help";
+import { getFirebaseAuth } from "@/lib/firebase/client";
 
-export const dynamic = "force-dynamic";
+export default function AccountPage() {
+  const router = useRouter();
+  const [ready, setReady] = React.useState(false);
+  const [user, setUser] = React.useState<User | null>(null);
+  const [configError, setConfigError] = React.useState<string | null>(null);
+  const [signingOut, setSigningOut] = React.useState(false);
 
-export const metadata = { title: "Account" };
-
-type CustomerSubscriptionRow = {
-  id: string;
-  status: string;
-  stripe_subscription_id: string;
-};
-
-export default async function AccountPage() {
-  const hasPublicSupabase =
-    Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()) &&
-    Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim());
-  if (!hasPublicSupabase) {
-    redirect("/auth/login?next=/account&error=config");
-  }
-
-  let supabase;
-  try {
-    supabase = await createClient();
-  } catch {
-    redirect("/auth/login?next=/account&error=config");
-  }
-
-  const { data: authData, error: authError } = await supabase.auth.getUser();
-  if (authError) {
-    redirect("/auth/login?next=/account&error=session");
-  }
-  const user = authData.user;
-  if (!user) {
-    redirect("/auth/login?next=/account");
-  }
-
-  type CustomerRow = { id: string; email: string; full_name: string | null; stripe_customer_id: string | null };
-  let customer: CustomerRow | null = null;
-  let loyalty: { data: { points_balance: number } | null } = { data: null };
-  let subs: { data: CustomerSubscriptionRow[] } = { data: [] };
-  let orders: { data: { id: string; status: string; total_cents: number; created_at: string }[] } = { data: [] };
-
-  try {
-    const { data: row, error: custErr } = await supabase
-      .from("customers")
-      .select("id, email, full_name, stripe_customer_id")
-      .eq("user_id", user.id)
-      .maybeSingle();
-    if (!custErr && row) {
-      customer = row as CustomerRow;
-      const [loyaltyRes, subsRes, ordersRes] = await Promise.all([
-        supabase.from("loyalty_accounts").select("points_balance").eq("customer_id", customer.id).maybeSingle(),
-        supabase
-          .from("customer_subscriptions")
-          .select("id, status, stripe_subscription_id, current_period_end")
-          .eq("customer_id", customer.id),
-        supabase
-          .from("orders")
-          .select("id, status, total_cents, created_at")
-          .eq("customer_id", customer.id)
-          .order("created_at", { ascending: false })
-          .limit(10),
-      ]);
-      loyalty = loyaltyRes;
-      subs = { data: (subsRes.data ?? []) as CustomerSubscriptionRow[] };
-      orders = {
-        data: (ordersRes.data ?? []) as { id: string; status: string; total_cents: number; created_at: string }[],
-      };
+  React.useEffect(() => {
+    let auth;
+    try {
+      auth = getFirebaseAuth();
+    } catch {
+      setConfigError(FIREBASE_PUBLIC_ENV_HELP);
+      setReady(true);
+      return;
     }
-  } catch {
-    /* migrations / RLS / network — still show signed-in shell */
+    const unsub = onAuthStateChanged(auth, (nextUser) => {
+      setUser(nextUser);
+      setReady(true);
+    });
+    return () => unsub();
+  }, []);
+
+  async function onSignOut() {
+    try {
+      setSigningOut(true);
+      await signOut(getFirebaseAuth());
+      router.push("/");
+      router.refresh();
+    } finally {
+      setSigningOut(false);
+    }
+  }
+
+  if (!ready) {
+    return (
+      <main className="mx-auto max-w-2xl px-4 py-12 sm:px-6">
+        <p className="text-sm text-muted-foreground">Loading account…</p>
+      </main>
+    );
+  }
+
+  if (configError) {
+    return (
+      <main className="mx-auto max-w-2xl px-4 py-12 sm:px-6">
+        <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">
+          {configError}
+        </p>
+      </main>
+    );
+  }
+
+  if (!user) {
+    return (
+      <main className="mx-auto max-w-2xl px-4 py-12 sm:px-6">
+        <h1 className="font-serif text-3xl font-semibold text-[hsl(222,47%,18%)]">Account</h1>
+        <p className="mt-2 text-sm text-muted-foreground">You need to sign in to view your account.</p>
+        <Link href="/auth/login?next=/account" className="mt-4 inline-block text-sm font-medium underline-offset-4 hover:underline">
+          Sign in
+        </Link>
+      </main>
+    );
   }
 
   return (
@@ -81,85 +78,19 @@ export default async function AccountPage() {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="font-serif text-3xl font-semibold text-[hsl(222,47%,18%)]">Account</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {customer?.full_name ?? user.email}
-          </p>
+          <p className="mt-1 text-sm text-muted-foreground">{user.displayName || user.email}</p>
         </div>
-        <form action="/auth/sign-out" method="post">
-          <Button type="submit" variant="outline" size="sm">
-            Sign out
-          </Button>
-        </form>
+        <Button type="button" variant="outline" size="sm" disabled={signingOut} onClick={onSignOut}>
+          {signingOut ? "Signing out…" : "Sign out"}
+        </Button>
       </div>
 
       <section className="mt-10 rounded-xl border bg-card p-5">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Loyalty</h2>
-        <p className="mt-2 font-serif text-3xl font-semibold text-[hsl(222,47%,18%)]">
-          {(loyalty.data?.points_balance ?? 0).toLocaleString()} pts
-        </p>
-        <p className="mt-2 text-xs text-muted-foreground">
-          Earned on completed non-Rx checkouts (see webhook rules). Flits-style credits can extend this ledger.
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Account details</h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Signed in with Firebase as <span className="font-medium text-foreground">{user.email}</span>.
         </p>
       </section>
-
-      <section className="mt-6 rounded-xl border bg-card p-5">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Subscriptions</h2>
-        {(subs.data ?? []).length === 0 ? (
-          <p className="mt-2 text-sm text-muted-foreground">
-            No active subscription.{" "}
-            <Link href="/subscribe" className="font-medium text-foreground underline-offset-4 hover:underline">
-              Join the monthly club
-            </Link>
-            .
-          </p>
-        ) : (
-          <ul className="mt-3 space-y-2 text-sm">
-            {(subs.data ?? []).map((s) => (
-              <li key={s.id} className="flex justify-between gap-2">
-                <span>{s.status}</span>
-                <span className="truncate text-xs text-muted-foreground">{s.stripe_subscription_id}</span>
-              </li>
-            ))}
-          </ul>
-        )}
-        {customer?.stripe_customer_id ? (
-          <div className="mt-4">
-            <AccountPortalButton />
-          </div>
-        ) : (
-          <p className="mt-4 text-xs text-muted-foreground">
-            Complete a Stripe checkout once to attach a billing customer for the self-serve portal.
-          </p>
-        )}
-      </section>
-
-      <section className="mt-6 rounded-xl border bg-card p-5">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Recent orders</h2>
-        {(orders.data ?? []).length === 0 ? (
-          <p className="mt-2 text-sm text-muted-foreground">No orders yet.</p>
-        ) : (
-          <ul className="mt-3 space-y-2 text-sm">
-            {(orders.data ?? []).map((o) => (
-              <li key={o.id} className="flex justify-between gap-2 border-b border-border pb-2 last:border-0">
-                <span className="capitalize">{o.status.replace(/_/g, " ")}</span>
-                <span>{((o.total_cents ?? 0) / 100).toLocaleString("en-US", { style: "currency", currency: "USD" })}</span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      <div className="mt-8 flex flex-wrap gap-3 text-sm">
-        <Link href="/wishlist" className="underline-offset-4 hover:underline">
-          Wishlist
-        </Link>
-        <Link href="/pages/track-order" className="underline-offset-4 hover:underline">
-          Track order
-        </Link>
-        <Link href="/admin" className="underline-offset-4 hover:underline">
-          Admin
-        </Link>
-      </div>
     </main>
   );
 }

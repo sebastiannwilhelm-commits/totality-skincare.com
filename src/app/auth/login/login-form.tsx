@@ -3,25 +3,20 @@
 import * as React from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { signInWithEmailAndPassword } from "firebase/auth";
 
 import { Button } from "@/components/ui/button";
 import { safeNextPath } from "@/lib/auth/safe-next-path";
-import { SUPABASE_PUBLIC_ENV_HELP } from "@/lib/supabase/config-help";
-import { createClient } from "@/lib/supabase/client";
+import { FIREBASE_PUBLIC_ENV_HELP } from "@/lib/firebase/config-help";
+import { getFirebaseAuth } from "@/lib/firebase/client";
 
-type LoginFormProps = {
-  /** From the server: false when public Supabase env vars are missing for this build. */
-  supabaseConfigured: boolean;
-};
-
-export function LoginForm({ supabaseConfigured }: LoginFormProps) {
-  void supabaseConfigured;
+export function LoginForm() {
   const searchParams = useSearchParams();
   const next = safeNextPath(searchParams.get("next"));
   const urlError = searchParams.get("error");
   const [clientConfigured, setClientConfigured] = React.useState<boolean | null>(null);
   const resolvedConfigured = clientConfigured !== false;
-  const configMessage = clientConfigured === false || urlError === "config" ? SUPABASE_PUBLIC_ENV_HELP : null;
+  const configMessage = clientConfigured === false || urlError === "config" ? FIREBASE_PUBLIC_ENV_HELP : null;
   const sessionMessage =
     urlError === "session"
       ? "We could not validate your session. Please sign in again."
@@ -41,7 +36,7 @@ export function LoginForm({ supabaseConfigured }: LoginFormProps) {
 
   React.useEffect(() => {
     try {
-      createClient();
+      getFirebaseAuth();
       setClientConfigured(true);
     } catch {
       setClientConfigured(false);
@@ -53,22 +48,23 @@ export function LoginForm({ supabaseConfigured }: LoginFormProps) {
     if (!resolvedConfigured) return;
     setLoading(true);
     setError(null);
-    let supabase;
+    let auth;
     try {
-      supabase = createClient();
+      auth = getFirebaseAuth();
     } catch {
-      setError(SUPABASE_PUBLIC_ENV_HELP);
+      setError(FIREBASE_PUBLIC_ENV_HELP);
       setLoading(false);
       return;
     }
-    const { error: err } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
-    if (err) {
-      setError(err.message);
-      return;
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      window.location.assign(next);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unable to sign in right now.";
+      setError(message);
+    } finally {
+      setLoading(false);
     }
-    // Full navigation so the next document request includes auth cookies (avoids RSC/client cookie lag after password sign-in).
-    window.location.assign(next);
   }
 
   return (

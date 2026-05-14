@@ -2,8 +2,9 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { onAuthStateChanged } from "firebase/auth";
 
-import { createClient } from "@/lib/supabase/client";
+import { getFirebaseAuth } from "@/lib/firebase/client";
 
 type HeaderAuthState =
   | { kind: "disabled" }
@@ -22,24 +23,20 @@ export function HeaderSupabaseAuthProvider({ children }: { children: React.React
   const [state, setState] = React.useState<HeaderAuthState>({ kind: "loading" });
 
   React.useEffect(() => {
-    let supabase: ReturnType<typeof createClient> | null = null;
+    let auth: ReturnType<typeof getFirebaseAuth> | null = null;
     try {
-      supabase = createClient();
+      auth = getFirebaseAuth();
     } catch {
       setState({ kind: "disabled" });
       return;
     }
 
-    void supabase.auth.getSession().then(({ data: { session } }) => {
-      setState({ kind: "ready", signedIn: !!session });
-    });
-
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-      setState({ kind: "ready", signedIn: !!session });
+    const unsub = onAuthStateChanged(auth, (user) => {
+      setState({ kind: "ready", signedIn: !!user });
     });
 
     return () => {
-      sub.subscription.unsubscribe();
+      unsub();
     };
   }, []);
 

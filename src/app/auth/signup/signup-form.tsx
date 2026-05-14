@@ -3,24 +3,20 @@
 import * as React from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 
 import { Button } from "@/components/ui/button";
 import { safeNextPath } from "@/lib/auth/safe-next-path";
-import { SUPABASE_PUBLIC_ENV_HELP } from "@/lib/supabase/config-help";
-import { createClient } from "@/lib/supabase/client";
+import { FIREBASE_PUBLIC_ENV_HELP } from "@/lib/firebase/config-help";
+import { getFirebaseAuth } from "@/lib/firebase/client";
 
-type SignupFormProps = {
-  supabaseConfigured: boolean;
-};
-
-export function SignupForm({ supabaseConfigured }: SignupFormProps) {
-  void supabaseConfigured;
+export function SignupForm() {
   const searchParams = useSearchParams();
   const next = safeNextPath(searchParams.get("next"));
   const urlError = searchParams.get("error");
   const [clientConfigured, setClientConfigured] = React.useState<boolean | null>(null);
   const resolvedConfigured = clientConfigured !== false;
-  const configMessage = clientConfigured === false || urlError === "config" ? SUPABASE_PUBLIC_ENV_HELP : null;
+  const configMessage = clientConfigured === false || urlError === "config" ? FIREBASE_PUBLIC_ENV_HELP : null;
 
   const [fullName, setFullName] = React.useState("");
   const [email, setEmail] = React.useState("");
@@ -34,7 +30,7 @@ export function SignupForm({ supabaseConfigured }: SignupFormProps) {
 
   React.useEffect(() => {
     try {
-      createClient();
+      getFirebaseAuth();
       setClientConfigured(true);
     } catch {
       setClientConfigured(false);
@@ -52,34 +48,26 @@ export function SignupForm({ supabaseConfigured }: SignupFormProps) {
       setLoading(false);
       return;
     }
-    let supabase;
+    let auth;
     try {
-      supabase = createClient();
+      auth = getFirebaseAuth();
     } catch {
-      setError(SUPABASE_PUBLIC_ENV_HELP);
+      setError(FIREBASE_PUBLIC_ENV_HELP);
       setLoading(false);
       return;
     }
-    const origin = window.location.origin;
-    const callback = `${origin}/auth/callback?next=${encodeURIComponent(next)}`;
-    const { data, error: err } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: callback,
-        data: { full_name: fullName },
-      },
-    });
-    setLoading(false);
-    if (err) {
-      setError(err.message);
-      return;
-    }
-    if (data.session) {
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      if (fullName.trim()) {
+        await updateProfile(cred.user, { displayName: fullName.trim() });
+      }
       window.location.assign(next);
-      return;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unable to create account right now.";
+      setError(message);
+    } finally {
+      setLoading(false);
     }
-    setMsg("Check your email to confirm your account, then sign in.");
   }
 
   const fieldDisabled = clientConfigured === false;
