@@ -3,7 +3,14 @@
 import * as React from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  getRedirectResult,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInWithRedirect,
+  updateProfile,
+} from "firebase/auth";
 
 import { Button } from "@/components/ui/button";
 import { safeNextPath } from "@/lib/auth/safe-next-path";
@@ -25,6 +32,7 @@ export function SignupForm() {
   const [error, setError] = React.useState<string | null>(null);
   const [msg, setMsg] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(false);
+  const [googleLoading, setGoogleLoading] = React.useState(false);
 
   const loginHref = next === "/account" ? "/auth/login" : `/auth/login?next=${encodeURIComponent(next)}`;
 
@@ -36,6 +44,29 @@ export function SignupForm() {
       setClientConfigured(false);
     }
   }, []);
+
+  React.useEffect(() => {
+    if (!resolvedConfigured) return;
+    let cancelled = false;
+    async function checkRedirectResult() {
+      try {
+        const auth = getFirebaseAuth();
+        const result = await getRedirectResult(auth);
+        if (!cancelled && result?.user) {
+          window.location.assign(next);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          const message = err instanceof Error ? err.message : "Unable to finish Google sign-up.";
+          setError(message);
+        }
+      }
+    }
+    void checkRedirectResult();
+    return () => {
+      cancelled = true;
+    };
+  }, [next, resolvedConfigured]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -67,6 +98,38 @@ export function SignupForm() {
       setError(message);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function onGoogleSignUp() {
+    if (!resolvedConfigured) return;
+    setError(null);
+    setMsg(null);
+    setGoogleLoading(true);
+    let auth;
+    try {
+      auth = getFirebaseAuth();
+    } catch {
+      setError(FIREBASE_PUBLIC_ENV_HELP);
+      setGoogleLoading(false);
+      return;
+    }
+
+    const provider = new GoogleAuthProvider();
+    try {
+      await signInWithPopup(auth, provider);
+      window.location.assign(next);
+      return;
+    } catch (err) {
+      const code = typeof err === "object" && err && "code" in err ? String(err.code) : "";
+      if (code === "auth/popup-blocked") {
+        await signInWithRedirect(auth, provider);
+        return;
+      }
+      const message = err instanceof Error ? err.message : "Unable to sign up with Google.";
+      setError(message);
+    } finally {
+      setGoogleLoading(false);
     }
   }
 
@@ -142,6 +205,15 @@ export function SignupForm() {
       {msg ? <p className="text-sm text-green-800">{msg}</p> : null}
       <Button type="submit" className="w-full" variant="blush" disabled={fieldDisabled || loading}>
         {loading ? "Creating…" : "Create account"}
+      </Button>
+      <Button
+        type="button"
+        className="w-full"
+        variant="outline"
+        disabled={fieldDisabled || googleLoading}
+        onClick={onGoogleSignUp}
+      >
+        {googleLoading ? "Connecting to Google…" : "Sign up with Google"}
       </Button>
       <p className="text-center text-sm text-muted-foreground">
         Already registered?{" "}

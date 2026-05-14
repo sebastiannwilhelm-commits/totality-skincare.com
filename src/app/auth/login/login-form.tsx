@@ -3,7 +3,13 @@
 import * as React from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import {
+  getRedirectResult,
+  GoogleAuthProvider,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  signInWithRedirect,
+} from "firebase/auth";
 
 import { Button } from "@/components/ui/button";
 import { safeNextPath } from "@/lib/auth/safe-next-path";
@@ -33,6 +39,7 @@ export function LoginForm() {
   const [password, setPassword] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(false);
+  const [googleLoading, setGoogleLoading] = React.useState(false);
 
   React.useEffect(() => {
     try {
@@ -42,6 +49,29 @@ export function LoginForm() {
       setClientConfigured(false);
     }
   }, []);
+
+  React.useEffect(() => {
+    if (!resolvedConfigured) return;
+    let cancelled = false;
+    async function checkRedirectResult() {
+      try {
+        const auth = getFirebaseAuth();
+        const result = await getRedirectResult(auth);
+        if (!cancelled && result?.user) {
+          window.location.assign(next);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          const message = err instanceof Error ? err.message : "Unable to finish Google sign-in.";
+          setError(message);
+        }
+      }
+    }
+    void checkRedirectResult();
+    return () => {
+      cancelled = true;
+    };
+  }, [next, resolvedConfigured]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -64,6 +94,37 @@ export function LoginForm() {
       setError(message);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function onGoogleSignIn() {
+    if (!resolvedConfigured) return;
+    setError(null);
+    setGoogleLoading(true);
+    let auth;
+    try {
+      auth = getFirebaseAuth();
+    } catch {
+      setError(FIREBASE_PUBLIC_ENV_HELP);
+      setGoogleLoading(false);
+      return;
+    }
+
+    const provider = new GoogleAuthProvider();
+    try {
+      await signInWithPopup(auth, provider);
+      window.location.assign(next);
+      return;
+    } catch (err) {
+      const code = typeof err === "object" && err && "code" in err ? String(err.code) : "";
+      if (code === "auth/popup-blocked") {
+        await signInWithRedirect(auth, provider);
+        return;
+      }
+      const message = err instanceof Error ? err.message : "Unable to sign in with Google.";
+      setError(message);
+    } finally {
+      setGoogleLoading(false);
     }
   }
 
@@ -106,6 +167,15 @@ export function LoginForm() {
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
       <Button type="submit" className="w-full" variant="blush" disabled={clientConfigured === false || loading}>
         {loading ? "Signing in…" : "Sign in"}
+      </Button>
+      <Button
+        type="button"
+        className="w-full"
+        variant="outline"
+        disabled={clientConfigured === false || googleLoading}
+        onClick={onGoogleSignIn}
+      >
+        {googleLoading ? "Connecting to Google…" : "Continue with Google"}
       </Button>
       <p className="text-center text-sm text-muted-foreground">
         No account?{" "}
