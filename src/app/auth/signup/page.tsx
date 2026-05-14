@@ -12,7 +12,7 @@ export default function SignupPage() {
         One account for checkout history, loyalty balance, and subscriptions.
       </p>
       <div className="mt-8">
-        <Suspense>
+        <Suspense fallback={<p className="text-sm text-muted-foreground">Loading…</p>}>
           <SignupForm />
         </Suspense>
       </div>

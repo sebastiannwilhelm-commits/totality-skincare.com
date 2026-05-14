@@ -2,25 +2,42 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
+import { safeNextPath } from "@/lib/auth/safe-next-path";
 import { createClient } from "@/lib/supabase/client";
 
 export function SignupForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const next = safeNextPath(searchParams.get("next"));
+  const urlError = searchParams.get("error");
+  const configMessage =
+    urlError === "config"
+      ? "This deployment is missing Supabase environment variables (NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY). Add them in Vercel, then redeploy."
+      : null;
+
   const [fullName, setFullName] = React.useState("");
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
+  const [confirmPassword, setConfirmPassword] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
   const [msg, setMsg] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(false);
+
+  const loginHref = next === "/account" ? "/auth/login" : `/auth/login?next=${encodeURIComponent(next)}`;
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
     setMsg(null);
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      setLoading(false);
+      return;
+    }
     let supabase;
     try {
       supabase = createClient();
@@ -32,11 +49,12 @@ export function SignupForm() {
       return;
     }
     const origin = window.location.origin;
+    const callback = `${origin}/auth/callback?next=${encodeURIComponent(next)}`;
     const { data, error: err } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: `${origin}/auth/callback?next=/account`,
+        emailRedirectTo: callback,
         data: { full_name: fullName },
       },
     });
@@ -46,7 +64,7 @@ export function SignupForm() {
       return;
     }
     if (data.session) {
-      router.push("/account");
+      router.push(next);
       router.refresh();
       return;
     }
@@ -55,6 +73,9 @@ export function SignupForm() {
 
   return (
     <form onSubmit={onSubmit} className="mx-auto max-w-sm space-y-4">
+      {configMessage ? (
+        <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">{configMessage}</p>
+      ) : null}
       <div>
         <label className="text-sm font-medium" htmlFor="name">
           Full name
@@ -97,6 +118,21 @@ export function SignupForm() {
           onChange={(e) => setPassword(e.target.value)}
         />
       </div>
+      <div>
+        <label className="text-sm font-medium" htmlFor="confirm-password">
+          Confirm password
+        </label>
+        <input
+          id="confirm-password"
+          type="password"
+          autoComplete="new-password"
+          required
+          minLength={8}
+          className="mt-1 h-11 w-full rounded-md border border-input bg-white px-3 text-sm"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+        />
+      </div>
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
       {msg ? <p className="text-sm text-green-800">{msg}</p> : null}
       <Button type="submit" className="w-full" variant="blush" disabled={loading}>
@@ -104,7 +140,7 @@ export function SignupForm() {
       </Button>
       <p className="text-center text-sm text-muted-foreground">
         Already registered?{" "}
-        <Link href="/auth/login" className="font-medium text-foreground underline-offset-4 hover:underline">
+        <Link href={loginHref} className="font-medium text-foreground underline-offset-4 hover:underline">
           Sign in
         </Link>
       </p>

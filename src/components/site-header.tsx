@@ -130,6 +130,12 @@ export function SiteHeader() {
             >
               Sign in
             </Link>
+            <Link
+              href="/auth/signup"
+              className="shrink-0 whitespace-nowrap transition hover:text-[hsl(222,47%,18%)]"
+            >
+              Sign up
+            </Link>
             <AccountNavWhenSignedIn className="relative z-10 shrink-0 whitespace-nowrap transition hover:text-[hsl(222,47%,18%)]" />
             <a
               href={LEGACY_STORE_URL}
@@ -278,6 +284,9 @@ export function SiteHeader() {
             </Link>
             <Link href="/auth/login" onClick={() => setOpen(false)} className="rounded-md px-3 py-2 hover:bg-muted">
               Sign in
+            </Link>
+            <Link href="/auth/signup" onClick={() => setOpen(false)} className="rounded-md px-3 py-2 hover:bg-muted">
+              Sign up
             </Link>
             <AccountNavWhenSignedIn
               onClick={() => setOpen(false)}

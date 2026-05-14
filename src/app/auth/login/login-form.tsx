@@ -5,12 +5,13 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
+import { safeNextPath } from "@/lib/auth/safe-next-path";
 import { createClient } from "@/lib/supabase/client";
 
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const next = searchParams.get("next") ?? "/account";
+  const next = safeNextPath(searchParams.get("next"));
   const urlError = searchParams.get("error");
   const configMessage =
     urlError === "config"
@@ -87,7 +88,10 @@ export function LoginForm() {
       </Button>
       <p className="text-center text-sm text-muted-foreground">
         No account?{" "}
-        <Link href="/auth/signup" className="font-medium text-foreground underline-offset-4 hover:underline">
+        <Link
+          href={next === "/account" ? "/auth/signup" : `/auth/signup?next=${encodeURIComponent(next)}`}
+          className="font-medium text-foreground underline-offset-4 hover:underline"
+        >
           Create one
         </Link>
       </p>
