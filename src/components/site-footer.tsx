@@ -59,6 +59,11 @@ export function SiteFooter() {
                   Search
                 </Link>
               </li>
+              <li>
+                <Link href="/admin/leads" className="hover:underline">
+                  Leads (admin)
+                </Link>
+              </li>
             </ul>
           </div>
           <div>

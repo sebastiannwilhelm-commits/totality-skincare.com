@@ -7,7 +7,7 @@ import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const STORAGE_KEY = "totality_lead_popup_dismissed_until_v1";
-const DELAY_MS = 7000;
+const DELAY_MS = 2000;
 
 export function LeadCapturePopup() {
   const pathname = usePathname();
