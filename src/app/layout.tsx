@@ -3,11 +3,13 @@ import { Cormorant_Garamond, Inter } from "next/font/google";
 
 import { CookieConsent } from "@/components/cookie-consent";
 import { LeadCapturePopup } from "@/components/lead-capture-popup";
+import { SupabasePublicBootstrap } from "@/components/supabase-public-bootstrap";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { CartProvider } from "@/context/cart-context";
 import { WishlistProvider } from "@/context/wishlist-context";
 import { SITE } from "@/config/store";
+import { getSupabasePublicEnv } from "@/lib/supabase/public-env";
 
 import "./globals.css";
 
@@ -45,11 +47,16 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const supabasePublic = getSupabasePublicEnv();
+
   return (
     <html lang="en">
       <body
         className={`${inter.variable} ${cormorant.variable} min-h-screen bg-background font-sans antialiased`}
       >
+        {supabasePublic ? (
+          <SupabasePublicBootstrap url={supabasePublic.url} anonKey={supabasePublic.anonKey} />
+        ) : null}
         <CartProvider>
           <WishlistProvider>
             <SiteHeader />
