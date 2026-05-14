@@ -3,6 +3,8 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { SITE } from "@/config/store";
 
+import { TrackOrderAuthActions } from "./track-order-auth-actions";
+
 export const metadata = {
   title: "Track order",
   description: "Track your Totality Skincare shipment.",
@@ -30,10 +32,8 @@ export default function TrackOrderPage() {
             Open order tracking (Shopify)
           </a>
         </Button>
-        <Button asChild variant="outline" size="lg">
-          <Link href="/account">Account (coming soon)</Link>
-        </Button>
       </div>
+      <TrackOrderAuthActions />
     </main>
   );
 }

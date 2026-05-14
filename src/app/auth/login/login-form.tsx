@@ -16,9 +16,13 @@ import { safeNextPath } from "@/lib/auth/safe-next-path";
 import { FIREBASE_PUBLIC_ENV_HELP } from "@/lib/firebase/config-help";
 import { getFirebaseAuth } from "@/lib/firebase/client";
 
+/** Avoid double Google auto-start in React Strict Mode (dev) remounts. */
+let loginFormGoogleAutoOnce = false;
+
 export function LoginForm() {
   const searchParams = useSearchParams();
   const next = safeNextPath(searchParams.get("next"));
+  const googleAuto = searchParams.get("google") === "1";
   const urlError = searchParams.get("error");
   const [clientConfigured, setClientConfigured] = React.useState<boolean | null>(null);
   const resolvedConfigured = clientConfigured !== false;
@@ -97,7 +101,7 @@ export function LoginForm() {
     }
   }
 
-  async function onGoogleSignIn() {
+  const onGoogleSignIn = React.useCallback(async () => {
     if (!resolvedConfigured) return;
     setError(null);
     setGoogleLoading(true);
@@ -126,7 +130,14 @@ export function LoginForm() {
     } finally {
       setGoogleLoading(false);
     }
-  }
+  }, [next, resolvedConfigured]);
+
+  React.useEffect(() => {
+    if (!googleAuto || !resolvedConfigured) return;
+    if (loginFormGoogleAutoOnce) return;
+    loginFormGoogleAutoOnce = true;
+    void onGoogleSignIn();
+  }, [googleAuto, resolvedConfigured, onGoogleSignIn]);
 
   return (
     <form onSubmit={onSubmit} className="mx-auto max-w-sm space-y-4">
@@ -173,7 +184,7 @@ export function LoginForm() {
         className="w-full"
         variant="outline"
         disabled={clientConfigured === false || googleLoading}
-        onClick={onGoogleSignIn}
+        onClick={() => void onGoogleSignIn()}
       >
         {googleLoading ? "Connecting to Google…" : "Continue with Google"}
       </Button>
