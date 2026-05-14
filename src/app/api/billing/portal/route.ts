@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
+import { isStripeSecretConfigured } from "@/lib/stripe/is-configured";
 import { createClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
@@ -8,7 +9,7 @@ export const runtime = "nodejs";
 const stripe = () => new Stripe(process.env.STRIPE_SECRET_KEY ?? "", { typescript: true });
 
 export async function POST(req: Request) {
-  if (!process.env.STRIPE_SECRET_KEY) {
+  if (!isStripeSecretConfigured()) {
     return NextResponse.json({ error: "stripe_not_configured" }, { status: 503 });
   }
 

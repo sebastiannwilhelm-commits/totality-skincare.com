@@ -1,0 +1,3 @@
+/** Shown when Stripe server env is missing; never includes secret values. */
+export const STRIPE_SERVER_CHECKOUT_ENV_HELP =
+  "Stripe is not configured for checkout on this deployment. In Vercel go to Project → Settings → Environment Variables and add STRIPE_SECRET_KEY (Stripe Dashboard → Developers → API keys → Secret key). Save and redeploy. Webhooks are separate: for production, create an endpoint in Stripe pointing to /api/webhooks/stripe and set STRIPE_WEBHOOK_SECRET from the signing secret in Vercel. For local development, copy .env.example to .env.local and set STRIPE_SECRET_KEY there.";

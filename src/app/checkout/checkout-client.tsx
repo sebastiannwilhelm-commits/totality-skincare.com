@@ -6,15 +6,29 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/cart-context";
 import { formatMoney, SITE } from "@/config/store";
+import { STRIPE_SERVER_CHECKOUT_ENV_HELP } from "@/lib/stripe/config-help";
 
-export function CheckoutClient() {
+function mapCheckoutErrorMessage(code: string | undefined): string {
+  if (code === "stripe_not_configured") return STRIPE_SERVER_CHECKOUT_ENV_HELP;
+  return code ?? "checkout_failed";
+}
+
+type CheckoutClientProps = {
+  /** From the server: Stripe secret key is set for API routes (never exposed to the client). */
+  stripeConfigured: boolean;
+};
+
+export function CheckoutClient({ stripeConfigured }: CheckoutClientProps) {
   const { lines, count } = useCart();
   const [email, setEmail] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const [err, setErr] = React.useState<string | null>(null);
+  const [stripeErr, setStripeErr] = React.useState<string | null>(null);
 
   async function pay() {
+    if (!stripeConfigured) return;
     setErr(null);
+    setStripeErr(null);
     setLoading(true);
     try {
       const res = await fetch("/api/checkout/create-session", {
@@ -28,7 +42,12 @@ export function CheckoutClient() {
       });
       const data = (await res.json()) as { url?: string; error?: string };
       if (!res.ok) {
-        setErr(data.error ?? "checkout_failed");
+        const raw = data.error ?? "checkout_failed";
+        if (raw === "stripe_not_configured") {
+          setStripeErr(mapCheckoutErrorMessage(raw));
+        } else {
+          setErr(mapCheckoutErrorMessage(raw));
+        }
         return;
       }
       if (data.url) {
@@ -57,6 +76,11 @@ export function CheckoutClient() {
 
   return (
     <div className="space-y-6">
+      {!stripeConfigured ? (
+        <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">
+          {STRIPE_SERVER_CHECKOUT_ENV_HELP}
+        </p>
+      ) : null}
       <div>
         <label className="text-sm font-medium" htmlFor="co-email">
           Email for receipt (optional if logged in elsewhere)
@@ -74,8 +98,11 @@ export function CheckoutClient() {
         Prescription-flagged carts use manual capture until Nicole approves. Free shipping reminder at{" "}
         {formatMoney(SITE.freeShippingMinCents)}+ still applies at fulfillment.
       </p>
+      {stripeErr ? (
+        <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">{stripeErr}</p>
+      ) : null}
       {err ? <p className="text-sm text-destructive">{err}</p> : null}
-      <Button type="button" variant="navy" size="lg" disabled={loading} onClick={pay}>
+      <Button type="button" variant="navy" size="lg" disabled={loading || !stripeConfigured} onClick={pay}>
         {loading ? "Redirecting to Stripe…" : "Pay securely with Stripe"}
       </Button>
     </div>
