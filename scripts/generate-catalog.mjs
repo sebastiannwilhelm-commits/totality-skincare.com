@@ -52,6 +52,8 @@ function vendorBrandSlug(p) {
 function vendorDisplayLabel(p) {
   const v = p.vendor?.trim() || "Unknown";
   if (v === "Cyspera") return "Scientis";
+  if (v === "GlyMed") return "GlyMed Plus";
+  if (v === "Upneeq") return "UPNEEQ";
   return v;
 }
 

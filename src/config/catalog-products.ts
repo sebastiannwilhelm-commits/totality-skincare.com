@@ -92,7 +92,7 @@ export const CATALOG_BRANDS: { slug: string; label: string }[] = [
   },
   {
     "slug": "glymed-plus",
-    "label": "GlyMed"
+    "label": "GlyMed Plus"
   },
   {
     "slug": "hydrinity",
@@ -252,7 +252,7 @@ export const CATALOG_BRANDS: { slug: string; label: string }[] = [
   },
   {
     "slug": "upneeq",
-    "label": "Upneeq"
+    "label": "UPNEEQ"
   },
   {
     "slug": "virtuelabs",
