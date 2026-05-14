@@ -6,17 +6,19 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { safeNextPath } from "@/lib/auth/safe-next-path";
+import { SUPABASE_PUBLIC_ENV_HELP } from "@/lib/supabase/config-help";
 import { createClient } from "@/lib/supabase/client";
 
-export function SignupForm() {
+type SignupFormProps = {
+  supabaseConfigured: boolean;
+};
+
+export function SignupForm({ supabaseConfigured }: SignupFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const next = safeNextPath(searchParams.get("next"));
   const urlError = searchParams.get("error");
-  const configMessage =
-    urlError === "config"
-      ? "This deployment is missing Supabase environment variables (NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY). Add them in Vercel, then redeploy."
-      : null;
+  const configMessage = !supabaseConfigured || urlError === "config" ? SUPABASE_PUBLIC_ENV_HELP : null;
 
   const [fullName, setFullName] = React.useState("");
   const [email, setEmail] = React.useState("");
@@ -30,6 +32,7 @@ export function SignupForm() {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!supabaseConfigured) return;
     setLoading(true);
     setError(null);
     setMsg(null);
@@ -42,9 +45,7 @@ export function SignupForm() {
     try {
       supabase = createClient();
     } catch {
-      setError(
-        "Sign-up is not configured on this site. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in the host environment.",
-      );
+      setError(SUPABASE_PUBLIC_ENV_HELP);
       setLoading(false);
       return;
     }
@@ -71,6 +72,8 @@ export function SignupForm() {
     setMsg("Check your email to confirm your account, then sign in.");
   }
 
+  const fieldDisabled = !supabaseConfigured;
+
   return (
     <form onSubmit={onSubmit} className="mx-auto max-w-sm space-y-4">
       {configMessage ? (
@@ -84,7 +87,8 @@ export function SignupForm() {
           id="name"
           autoComplete="name"
           required
-          className="mt-1 h-11 w-full rounded-md border border-input bg-white px-3 text-sm"
+          disabled={fieldDisabled}
+          className="mt-1 h-11 w-full rounded-md border border-input bg-white px-3 text-sm disabled:cursor-not-allowed disabled:opacity-60"
           value={fullName}
           onChange={(e) => setFullName(e.target.value)}
         />
@@ -98,7 +102,8 @@ export function SignupForm() {
           type="email"
           autoComplete="email"
           required
-          className="mt-1 h-11 w-full rounded-md border border-input bg-white px-3 text-sm"
+          disabled={fieldDisabled}
+          className="mt-1 h-11 w-full rounded-md border border-input bg-white px-3 text-sm disabled:cursor-not-allowed disabled:opacity-60"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
@@ -113,7 +118,8 @@ export function SignupForm() {
           autoComplete="new-password"
           required
           minLength={8}
-          className="mt-1 h-11 w-full rounded-md border border-input bg-white px-3 text-sm"
+          disabled={fieldDisabled}
+          className="mt-1 h-11 w-full rounded-md border border-input bg-white px-3 text-sm disabled:cursor-not-allowed disabled:opacity-60"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
@@ -128,14 +134,15 @@ export function SignupForm() {
           autoComplete="new-password"
           required
           minLength={8}
-          className="mt-1 h-11 w-full rounded-md border border-input bg-white px-3 text-sm"
+          disabled={fieldDisabled}
+          className="mt-1 h-11 w-full rounded-md border border-input bg-white px-3 text-sm disabled:cursor-not-allowed disabled:opacity-60"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
         />
       </div>
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
       {msg ? <p className="text-sm text-green-800">{msg}</p> : null}
-      <Button type="submit" className="w-full" variant="blush" disabled={loading}>
+      <Button type="submit" className="w-full" variant="blush" disabled={fieldDisabled || loading}>
         {loading ? "Creating…" : "Create account"}
       </Button>
       <p className="text-center text-sm text-muted-foreground">

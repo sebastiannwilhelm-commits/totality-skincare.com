@@ -6,17 +6,20 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { safeNextPath } from "@/lib/auth/safe-next-path";
+import { SUPABASE_PUBLIC_ENV_HELP } from "@/lib/supabase/config-help";
 import { createClient } from "@/lib/supabase/client";
 
-export function LoginForm() {
+type LoginFormProps = {
+  /** From the server: false when public Supabase env vars are missing for this build. */
+  supabaseConfigured: boolean;
+};
+
+export function LoginForm({ supabaseConfigured }: LoginFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const next = safeNextPath(searchParams.get("next"));
   const urlError = searchParams.get("error");
-  const configMessage =
-    urlError === "config"
-      ? "This deployment is missing Supabase environment variables (NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY). Add them in Vercel, then redeploy."
-      : null;
+  const configMessage = !supabaseConfigured || urlError === "config" ? SUPABASE_PUBLIC_ENV_HELP : null;
   const sessionMessage =
     urlError === "session"
       ? "We could not validate your session. Please sign in again."
@@ -28,15 +31,14 @@ export function LoginForm() {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!supabaseConfigured) return;
     setLoading(true);
     setError(null);
     let supabase;
     try {
       supabase = createClient();
     } catch {
-      setError(
-        "Sign-in is not configured on this site. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in the host environment.",
-      );
+      setError(SUPABASE_PUBLIC_ENV_HELP);
       setLoading(false);
       return;
     }
@@ -63,7 +65,8 @@ export function LoginForm() {
           type="email"
           autoComplete="email"
           required
-          className="mt-1 h-11 w-full rounded-md border border-input bg-white px-3 text-sm"
+          disabled={!supabaseConfigured}
+          className="mt-1 h-11 w-full rounded-md border border-input bg-white px-3 text-sm disabled:cursor-not-allowed disabled:opacity-60"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
@@ -77,13 +80,14 @@ export function LoginForm() {
           type="password"
           autoComplete="current-password"
           required
-          className="mt-1 h-11 w-full rounded-md border border-input bg-white px-3 text-sm"
+          disabled={!supabaseConfigured}
+          className="mt-1 h-11 w-full rounded-md border border-input bg-white px-3 text-sm disabled:cursor-not-allowed disabled:opacity-60"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
       </div>
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
-      <Button type="submit" className="w-full" variant="blush" disabled={loading}>
+      <Button type="submit" className="w-full" variant="blush" disabled={!supabaseConfigured || loading}>
         {loading ? "Signing in…" : "Sign in"}
       </Button>
       <p className="text-center text-sm text-muted-foreground">
