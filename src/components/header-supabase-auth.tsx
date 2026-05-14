@@ -52,10 +52,11 @@ function useHeaderAuthState(): HeaderAuthState {
 
 export function HeaderSupabaseAuthDesktop() {
   const state = useHeaderAuthState();
-  if (state.kind === "disabled") return null;
-
+  // Without Supabase env we cannot know session; still show auth entry points.
   const showGuests =
-    state.kind === "loading" || (state.kind === "ready" && !state.signedIn);
+    state.kind === "disabled" ||
+    state.kind === "loading" ||
+    (state.kind === "ready" && !state.signedIn);
   const showAccount = state.kind === "ready" && state.signedIn;
 
   return (
@@ -81,10 +82,10 @@ export function HeaderSupabaseAuthDesktop() {
 
 export function HeaderSupabaseAuthDrawer({ onLinkClick }: { onLinkClick: () => void }) {
   const state = useHeaderAuthState();
-  if (state.kind === "disabled") return null;
-
   const showGuests =
-    state.kind === "loading" || (state.kind === "ready" && !state.signedIn);
+    state.kind === "disabled" ||
+    state.kind === "loading" ||
+    (state.kind === "ready" && !state.signedIn);
   const showAccount = state.kind === "ready" && state.signedIn;
 
   return (
