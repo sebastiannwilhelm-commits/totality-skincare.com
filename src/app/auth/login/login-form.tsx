@@ -18,7 +18,9 @@ export function LoginForm({ supabaseConfigured }: LoginFormProps) {
   const searchParams = useSearchParams();
   const next = safeNextPath(searchParams.get("next"));
   const urlError = searchParams.get("error");
-  const configMessage = !supabaseConfigured || urlError === "config" ? SUPABASE_PUBLIC_ENV_HELP : null;
+  const [clientConfigured, setClientConfigured] = React.useState<boolean | null>(null);
+  const resolvedConfigured = clientConfigured ?? supabaseConfigured;
+  const configMessage = !resolvedConfigured || urlError === "config" ? SUPABASE_PUBLIC_ENV_HELP : null;
   const sessionMessage =
     urlError === "session"
       ? "We could not validate your session. Please sign in again."
@@ -36,9 +38,18 @@ export function LoginForm({ supabaseConfigured }: LoginFormProps) {
   const [error, setError] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(false);
 
+  React.useEffect(() => {
+    try {
+      createClient();
+      setClientConfigured(true);
+    } catch {
+      setClientConfigured(false);
+    }
+  }, []);
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!supabaseConfigured) return;
+    if (!resolvedConfigured) return;
     setLoading(true);
     setError(null);
     let supabase;
@@ -74,7 +85,7 @@ export function LoginForm({ supabaseConfigured }: LoginFormProps) {
           type="email"
           autoComplete="email"
           required
-          disabled={!supabaseConfigured}
+          disabled={!resolvedConfigured}
           className="mt-1 h-11 w-full rounded-md border border-input bg-white px-3 text-sm disabled:cursor-not-allowed disabled:opacity-60"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -89,14 +100,14 @@ export function LoginForm({ supabaseConfigured }: LoginFormProps) {
           type="password"
           autoComplete="current-password"
           required
-          disabled={!supabaseConfigured}
+          disabled={!resolvedConfigured}
           className="mt-1 h-11 w-full rounded-md border border-input bg-white px-3 text-sm disabled:cursor-not-allowed disabled:opacity-60"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
       </div>
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
-      <Button type="submit" className="w-full" variant="blush" disabled={!supabaseConfigured || loading}>
+      <Button type="submit" className="w-full" variant="blush" disabled={!resolvedConfigured || loading}>
         {loading ? "Signing in…" : "Sign in"}
       </Button>
       <p className="text-center text-sm text-muted-foreground">

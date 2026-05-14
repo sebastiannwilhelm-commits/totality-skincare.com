@@ -17,7 +17,9 @@ export function SignupForm({ supabaseConfigured }: SignupFormProps) {
   const searchParams = useSearchParams();
   const next = safeNextPath(searchParams.get("next"));
   const urlError = searchParams.get("error");
-  const configMessage = !supabaseConfigured || urlError === "config" ? SUPABASE_PUBLIC_ENV_HELP : null;
+  const [clientConfigured, setClientConfigured] = React.useState<boolean | null>(null);
+  const resolvedConfigured = clientConfigured ?? supabaseConfigured;
+  const configMessage = !resolvedConfigured || urlError === "config" ? SUPABASE_PUBLIC_ENV_HELP : null;
 
   const [fullName, setFullName] = React.useState("");
   const [email, setEmail] = React.useState("");
@@ -29,9 +31,18 @@ export function SignupForm({ supabaseConfigured }: SignupFormProps) {
 
   const loginHref = next === "/account" ? "/auth/login" : `/auth/login?next=${encodeURIComponent(next)}`;
 
+  React.useEffect(() => {
+    try {
+      createClient();
+      setClientConfigured(true);
+    } catch {
+      setClientConfigured(false);
+    }
+  }, []);
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!supabaseConfigured) return;
+    if (!resolvedConfigured) return;
     setLoading(true);
     setError(null);
     setMsg(null);
@@ -70,7 +81,7 @@ export function SignupForm({ supabaseConfigured }: SignupFormProps) {
     setMsg("Check your email to confirm your account, then sign in.");
   }
 
-  const fieldDisabled = !supabaseConfigured;
+  const fieldDisabled = !resolvedConfigured;
 
   return (
     <form onSubmit={onSubmit} className="mx-auto max-w-sm space-y-4">
