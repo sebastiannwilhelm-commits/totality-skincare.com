@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { safeNextPath } from "@/lib/auth/safe-next-path";
@@ -15,7 +15,6 @@ type LoginFormProps = {
 };
 
 export function LoginForm({ supabaseConfigured }: LoginFormProps) {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const next = safeNextPath(searchParams.get("next"));
   const urlError = searchParams.get("error");
@@ -23,6 +22,14 @@ export function LoginForm({ supabaseConfigured }: LoginFormProps) {
   const sessionMessage =
     urlError === "session"
       ? "We could not validate your session. Please sign in again."
+      : null;
+  const authLinkMessage =
+    urlError === "auth"
+      ? "That sign-in link could not be completed. Request a new link or sign in with your password."
+      : null;
+  const serverMessage =
+    urlError === "server"
+      ? "We could not reach the auth service. Wait a moment and try again, or refresh the page."
       : null;
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
@@ -48,14 +55,16 @@ export function LoginForm({ supabaseConfigured }: LoginFormProps) {
       setError(err.message);
       return;
     }
-    router.push(next);
-    router.refresh();
+    // Full navigation so the next document request includes auth cookies (avoids RSC/client cookie lag after password sign-in).
+    window.location.assign(next);
   }
 
   return (
     <form onSubmit={onSubmit} className="mx-auto max-w-sm space-y-4">
       {configMessage ? <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">{configMessage}</p> : null}
       {sessionMessage ? <p className="rounded-md border border-border bg-muted/50 px-3 py-2 text-sm text-muted-foreground">{sessionMessage}</p> : null}
+      {authLinkMessage ? <p className="rounded-md border border-border bg-muted/50 px-3 py-2 text-sm text-muted-foreground">{authLinkMessage}</p> : null}
+      {serverMessage ? <p className="rounded-md border border-border bg-muted/50 px-3 py-2 text-sm text-muted-foreground">{serverMessage}</p> : null}
       <div>
         <label className="text-sm font-medium" htmlFor="email">
           Email

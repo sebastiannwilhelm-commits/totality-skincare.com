@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { safeNextPath } from "@/lib/auth/safe-next-path";
@@ -14,7 +14,6 @@ type SignupFormProps = {
 };
 
 export function SignupForm({ supabaseConfigured }: SignupFormProps) {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const next = safeNextPath(searchParams.get("next"));
   const urlError = searchParams.get("error");
@@ -65,8 +64,7 @@ export function SignupForm({ supabaseConfigured }: SignupFormProps) {
       return;
     }
     if (data.session) {
-      router.push(next);
-      router.refresh();
+      window.location.assign(next);
       return;
     }
     setMsg("Check your email to confirm your account, then sign in.");
