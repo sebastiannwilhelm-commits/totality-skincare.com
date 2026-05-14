@@ -4,6 +4,7 @@ import { SignupForm } from "./signup-form";
 import { isSupabasePublicConfigured } from "@/lib/supabase/public-env";
 
 export const metadata = { title: "Create account" };
+export const dynamic = "force-dynamic";
 
 export default function SignupPage() {
   const supabaseConfigured = isSupabasePublicConfigured();

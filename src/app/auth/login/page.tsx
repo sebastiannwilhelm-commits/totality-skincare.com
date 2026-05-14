@@ -5,6 +5,7 @@ import { LoginForm } from "./login-form";
 import { isSupabasePublicConfigured } from "@/lib/supabase/public-env";
 
 export const metadata = { title: "Sign in" };
+export const dynamic = "force-dynamic";
 
 export default function LoginPage() {
   const supabaseConfigured = isSupabasePublicConfigured();
