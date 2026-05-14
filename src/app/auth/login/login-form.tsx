@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import type { Auth } from "firebase/auth";
 import {
   getRedirectResult,
   GoogleAuthProvider,
@@ -18,6 +19,41 @@ import { getFirebaseAuth } from "@/lib/firebase/client";
 
 /** Avoid double Google auto-start in React Strict Mode (dev) remounts. */
 let loginFormGoogleAutoOnce = false;
+
+function adminNextPath(next: string): boolean {
+  return next === "/admin" || next.startsWith("/admin/");
+}
+
+async function establishFirebaseAdminSession(auth: Auth): Promise<{ ok: true } | { ok: false; error: string }> {
+  const idToken = await auth.currentUser?.getIdToken();
+  if (!idToken) return { ok: false, error: "no_id_token" };
+  const res = await fetch("/api/admin/firebase-session", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ idToken }),
+  });
+  if (res.ok) return { ok: true };
+  let code = "admin_session_failed";
+  try {
+    const j = (await res.json()) as { error?: string };
+    if (typeof j.error === "string") code = j.error;
+  } catch {
+    /* ignore */
+  }
+  return { ok: false, error: code };
+}
+
+function mapAdminSessionError(code: string): string {
+  if (code === "not_allowlisted_admin") return "This account is not authorized for admin.";
+  if (code === "admin_session_secret_missing" || code === "could_not_sign_session")
+    return "Admin sign-in is not fully configured on the server (missing ADMIN_SESSION_SECRET).";
+  if (code === "firebase_project_not_configured") return "Firebase project ID is not configured (NEXT_PUBLIC_FIREBASE_PROJECT_ID).";
+  if (code === "email_not_verified") return "Verify your email before accessing admin.";
+  if (code === "email_required") return "Your sign-in must include an email to use admin.";
+  if (code === "invalid_id_token") return "Your sign-in could not be verified. Try again.";
+  return "Could not complete admin sign-in. Check server logs.";
+}
 
 export function LoginForm() {
   const searchParams = useSearchParams();
@@ -62,6 +98,13 @@ export function LoginForm() {
         const auth = getFirebaseAuth();
         const result = await getRedirectResult(auth);
         if (!cancelled && result?.user) {
+          if (adminNextPath(next)) {
+            const gate = await establishFirebaseAdminSession(auth);
+            if (!gate.ok) {
+              setError(mapAdminSessionError(gate.error));
+              return;
+            }
+          }
           window.location.assign(next);
         }
       } catch (err) {
@@ -92,6 +135,13 @@ export function LoginForm() {
     }
     try {
       await signInWithEmailAndPassword(auth, email, password);
+      if (adminNextPath(next)) {
+        const gate = await establishFirebaseAdminSession(auth);
+        if (!gate.ok) {
+          setError(mapAdminSessionError(gate.error));
+          return;
+        }
+      }
       window.location.assign(next);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unable to sign in right now.";
@@ -117,6 +167,13 @@ export function LoginForm() {
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
+      if (adminNextPath(next)) {
+        const gate = await establishFirebaseAdminSession(auth);
+        if (!gate.ok) {
+          setError(mapAdminSessionError(gate.error));
+          return;
+        }
+      }
       window.location.assign(next);
       return;
     } catch (err) {

@@ -1,9 +1,9 @@
-import { createClient } from "@/lib/supabase/server";
+import { createAdminDataClient } from "@/lib/supabase/admin-data";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminLeadsPage() {
-  const supabase = await createClient();
+  const supabase = createAdminDataClient();
   const { data: leads, error } = await supabase
     .from("leads")
     .select("id, created_at, source, email, first_name, page_url")

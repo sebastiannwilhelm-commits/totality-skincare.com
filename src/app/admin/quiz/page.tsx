@@ -1,9 +1,9 @@
-import { createClient } from "@/lib/supabase/server";
+import { createAdminDataClient } from "@/lib/supabase/admin-data";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminQuizPage() {
-  const supabase = await createClient();
+  const supabase = createAdminDataClient();
   const { data, error } = await supabase
     .from("quiz_sessions")
     .select("id, created_at, email, completed, recommended_slugs, answers")

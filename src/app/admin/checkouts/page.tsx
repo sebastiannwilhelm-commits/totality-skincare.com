@@ -1,9 +1,9 @@
-import { createClient } from "@/lib/supabase/server";
+import { createAdminDataClient } from "@/lib/supabase/admin-data";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminCheckoutsPage() {
-  const supabase = await createClient();
+  const supabase = createAdminDataClient();
   const { data, error } = await supabase
     .from("checkout_sessions")
     .select("id, created_at, customer_email, amount_total_cents, currency, payment_status")

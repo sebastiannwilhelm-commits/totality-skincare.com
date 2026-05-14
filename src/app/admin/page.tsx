@@ -1,9 +1,9 @@
-import { createClient } from "@/lib/supabase/server";
+import { createAdminDataClient } from "@/lib/supabase/admin-data";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminHomePage() {
-  const supabase = await createClient();
+  const supabase = createAdminDataClient();
 
   const [{ count: leadCount }, { count: quizCount }, { count: checkoutCount }, { count: orderCount }] =
     await Promise.all([
@@ -24,8 +24,10 @@ export default async function AdminHomePage() {
     <div>
       <h1 className="font-serif text-2xl font-semibold">Overview</h1>
       <p className="mt-2 max-w-xl text-sm text-stone-400">
-        Totality storefront operations. Grant access with{" "}
-        <code className="rounded bg-black/40 px-1 py-0.5 text-xs">insert into admin_roles (user_id) values (&apos;…&apos;);</code>
+        Totality storefront operations. Grant Supabase-auth admins with{" "}
+        <code className="rounded bg-black/40 px-1 py-0.5 text-xs">insert into admin_roles (user_id) values (&apos;…&apos;);</code>{" "}
+        or set <code className="rounded bg-black/40 px-1 py-0.5 text-xs">ADMIN_EMAILS</code> for Firebase sign-in (see{" "}
+        <code className="rounded bg-black/40 px-1 py-0.5 text-xs">.env.example</code>).
       </p>
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {cards.map((c) => (

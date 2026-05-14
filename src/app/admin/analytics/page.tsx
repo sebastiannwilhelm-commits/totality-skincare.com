@@ -1,9 +1,9 @@
-import { createClient } from "@/lib/supabase/server";
+import { createAdminDataClient } from "@/lib/supabase/admin-data";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminAnalyticsPage() {
-  const supabase = await createClient();
+  const supabase = createAdminDataClient();
   const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
   const [{ count: leads7 }, { count: orders7 }, { count: quizzes7 }] = await Promise.all([

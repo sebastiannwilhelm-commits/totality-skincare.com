@@ -7,26 +7,32 @@ import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/cart-context";
 import { formatMoney, SITE } from "@/config/store";
 import { STRIPE_SERVER_CHECKOUT_ENV_HELP } from "@/lib/stripe/config-help";
+import { SUPABASE_SERVER_CHECKOUT_ENV_HELP } from "@/lib/supabase/config-help";
 
 function mapCheckoutErrorMessage(code: string | undefined): string {
   if (code === "stripe_not_configured") return STRIPE_SERVER_CHECKOUT_ENV_HELP;
+  if (code === "supabase_not_configured") return SUPABASE_SERVER_CHECKOUT_ENV_HELP;
   return code ?? "checkout_failed";
 }
 
 type CheckoutClientProps = {
   /** From the server: Stripe secret key is set for API routes (never exposed to the client). */
   stripeConfigured: boolean;
+  /** Supabase URL + service role set so `/api/checkout/create-session` can load product rows. */
+  supabaseForCartConfigured: boolean;
 };
 
-export function CheckoutClient({ stripeConfigured }: CheckoutClientProps) {
+export function CheckoutClient({ stripeConfigured, supabaseForCartConfigured }: CheckoutClientProps) {
   const { lines, count } = useCart();
   const [email, setEmail] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const [err, setErr] = React.useState<string | null>(null);
   const [stripeErr, setStripeErr] = React.useState<string | null>(null);
 
+  const cartPayReady = stripeConfigured && supabaseForCartConfigured;
+
   async function pay() {
-    if (!stripeConfigured) return;
+    if (!cartPayReady) return;
     setErr(null);
     setStripeErr(null);
     setLoading(true);
@@ -43,7 +49,7 @@ export function CheckoutClient({ stripeConfigured }: CheckoutClientProps) {
       const data = (await res.json()) as { url?: string; error?: string };
       if (!res.ok) {
         const raw = data.error ?? "checkout_failed";
-        if (raw === "stripe_not_configured") {
+        if (raw === "stripe_not_configured" || raw === "supabase_not_configured") {
           setStripeErr(mapCheckoutErrorMessage(raw));
         } else {
           setErr(mapCheckoutErrorMessage(raw));
@@ -81,6 +87,11 @@ export function CheckoutClient({ stripeConfigured }: CheckoutClientProps) {
           {STRIPE_SERVER_CHECKOUT_ENV_HELP}
         </p>
       ) : null}
+      {stripeConfigured && !supabaseForCartConfigured ? (
+        <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">
+          {SUPABASE_SERVER_CHECKOUT_ENV_HELP}
+        </p>
+      ) : null}
       <div>
         <label className="text-sm font-medium" htmlFor="co-email">
           Email for receipt (optional if logged in elsewhere)
@@ -102,7 +113,7 @@ export function CheckoutClient({ stripeConfigured }: CheckoutClientProps) {
         <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">{stripeErr}</p>
       ) : null}
       {err ? <p className="text-sm text-destructive">{err}</p> : null}
-      <Button type="button" variant="navy" size="lg" disabled={loading || !stripeConfigured} onClick={pay}>
+      <Button type="button" variant="navy" size="lg" disabled={loading || !cartPayReady} onClick={pay}>
         {loading ? "Redirecting to Stripe…" : "Pay securely with Stripe"}
       </Button>
     </div>
