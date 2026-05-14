@@ -1,4 +1,5 @@
 import type { ConcernSlug, StoreProduct } from "@/lib/types";
+import { CATALOG_BRANDS, CATALOG_PRODUCTS } from "@/config/catalog-products";
 
 /** Canonical public storefront (legacy Shopify until cutover). */
 export const LEGACY_STORE_URL = "https://totality-skincare.com" as const;
@@ -33,121 +34,11 @@ export const CONCERNS: { slug: ConcernSlug; label: string; blurb: string }[] = [
   { slug: "brightening", label: "Brightening", blurb: "Even tone and radiance-forward care." },
 ];
 
-export const BRANDS: { slug: string; label: string }[] = [
-  { slug: "obagi", label: "Obagi" },
-  { slug: "upneeq", label: "UPNEEQ" },
-  { slug: "scientis", label: "Scientis" },
-  { slug: "kenra", label: "Kenra" },
-  { slug: "glymed-plus", label: "GlyMed Plus" },
-  { slug: "moira", label: "Moira" },
-];
+/** Brands aligned with Shopify `vendor` (see `scripts/generate-catalog.mjs`). */
+export const BRANDS: { slug: string; label: string }[] = CATALOG_BRANDS;
 
-const u = (id: string, sig: string) =>
-  `https://images.unsplash.com/${id}?auto=format&fit=crop&w=720&q=80&sig=${sig}`;
-
-/** Seeded from the live homepage “Our Best Sellers” (prices + handles as of crawl). */
-export const PRODUCTS: StoreProduct[] = [
-  {
-    slug: "upneeq-eyedrops-45-vials",
-    name: "UPNEEQ 45 Day Supply",
-    description: "Prescription-strength eye drops — fulfillment subject to medical review when required.",
-    priceCents: 22000,
-    currency: "usd",
-    brand: "upneeq",
-    concerns: ["anti-aging", "brightening"],
-    imageSrc: u("photo-1570172619644-dfd03ed5d881", "up45"),
-    isPrescriptionRequired: true,
-  },
-  {
-    slug: "scientis-cyspera-cysteamine-intensive-pigment-corrector",
-    name: "Scientis Cyspera Cysteamine Intensive Pigment Corrector",
-    description: "Intensive pigment-correcting care for stubborn discoloration.",
-    priceCents: 17500,
-    currency: "usd",
-    brand: "scientis",
-    concerns: ["brightening", "anti-aging"],
-    imageSrc: u("photo-1616394584738-fc6e612e71b9", "cys"),
-    isPrescriptionRequired: false,
-  },
-  {
-    slug: "obagi-clear",
-    name: "Obagi Nu-Derm Clear RX 2.0oz",
-    description: "Rx clarifying formula — prescription verification applies.",
-    priceCents: 13500,
-    currency: "usd",
-    brand: "obagi",
-    concerns: ["brightening", "acne"],
-    imageSrc: u("photo-1556228578-0d85b1a4d571", "obc"),
-    isPrescriptionRequired: true,
-  },
-  {
-    slug: "kenra-thermal-styling-spray-19",
-    name: "Kenra Thermal Styling Spray 19",
-    description: "Thermal protection for heat styling.",
-    priceCents: 2000,
-    currency: "usd",
-    brand: "kenra",
-    concerns: ["dryness"],
-    imageSrc: u("photo-1522338242992-e1a54906a8da", "ken"),
-    isPrescriptionRequired: false,
-  },
-  {
-    slug: "glymed-plus-skin-mist-1",
-    name: "GlyMed Plus Skin Mist",
-    description: "Refreshing facial mist for hydration on the go.",
-    priceCents: 8400,
-    currency: "usd",
-    brand: "glymed-plus",
-    concerns: ["dryness", "sensitive"],
-    imageSrc: u("photo-1598440947619-2c35fc9aa908", "gly"),
-    isPrescriptionRequired: false,
-  },
-  {
-    slug: "obagi-c-rc-norm-dry",
-    name: "Obagi C RX Clarifying Serum Normal to Dry",
-    description: "Vitamin C clarifying serum — Rx where applicable.",
-    priceCents: 15500,
-    currency: "usd",
-    brand: "obagi",
-    concerns: ["brightening", "anti-aging", "dryness"],
-    imageSrc: u("photo-1571875257727-256c39da42af", "obcr"),
-    isPrescriptionRequired: true,
-  },
-  {
-    slug: "obagitretinoin0-1",
-    name: "Obagi Tretinoin 0.1% Cream 0.7 oz",
-    description: "Prescription retinoid — Nicole approval workflow required.",
-    priceCents: 10500,
-    currency: "usd",
-    brand: "obagi",
-    concerns: ["acne", "anti-aging", "brightening"],
-    imageSrc: u("photo-1620916566398-39f1143ab7be", "tre"),
-    isPrescriptionRequired: true,
-  },
-  {
-    slug: "upneeq-sample-box-10-vials-1",
-    name: "UPNEEQ 10 Day Supply",
-    description: "Shorter supply option — prescription rules apply.",
-    priceCents: 6500,
-    currency: "usd",
-    brand: "upneeq",
-    concerns: ["anti-aging"],
-    imageSrc: u("photo-1515377905702-c7a6da32d1a7", "up10"),
-    isPrescriptionRequired: true,
-  },
-  {
-    slug: "moira-lip-appeal-waterproof-liner",
-    name: "Moira Lip Appeal Waterproof Liner",
-    description: "Waterproof liner — multiple shade options in-store.",
-    priceCents: 600,
-    currency: "usd",
-    brand: "moira",
-    concerns: ["brightening"],
-    imageSrc: u("photo-1586495777744-4413f21062fa", "moi"),
-    isPrescriptionRequired: false,
-    comingSoon: true,
-  },
-];
+/** Full Totality Skincare sellable catalog from Shopify `collections/all` (live site). */
+export const PRODUCTS: StoreProduct[] = CATALOG_PRODUCTS;
 
 export function productBySlug(slug: string): StoreProduct | undefined {
   return PRODUCTS.find((p) => p.slug === slug);

@@ -30,3 +30,6 @@ Thumbs.db
 # Supabase local (optional)
 supabase/.branches
 supabase/.temp
+
+# Local Shopify JSON dumps for catalog generation
+shopify-p*.json
