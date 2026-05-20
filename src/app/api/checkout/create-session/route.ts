@@ -58,13 +58,17 @@ export async function POST(req: Request) {
 
       const { data: row } = await supabase
         .from("products")
-        .select("id, name, price_cents, is_prescription_required")
+        .select("id, name, price_cents, is_prescription_required, inventory_count")
         .eq("slug", line.slug)
         .maybeSingle();
 
       const name = row?.name ?? seed.name;
       const unit = Number(row?.price_cents ?? seed.priceCents);
       const rx = Boolean(row?.is_prescription_required ?? seed.isPrescriptionRequired);
+      const stock = row?.inventory_count ?? (seed.comingSoon ? 0 : 99);
+      if (stock < line.quantity) {
+        return NextResponse.json({ error: "out_of_stock", slug: line.slug }, { status: 400 });
+      }
       if (rx) requiresRx = true;
       subtotal += unit * line.quantity;
 

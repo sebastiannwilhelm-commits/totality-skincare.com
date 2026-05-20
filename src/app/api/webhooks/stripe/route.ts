@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
+import { notifyOrderConfirmation } from "@/lib/notifications/order-events";
+import { generateIntakeToken } from "@/lib/orders/intake-token";
 import { createServiceClient } from "@/lib/supabase/service";
 
 export const runtime = "nodejs";
@@ -117,6 +119,7 @@ export async function POST(req: Request) {
     }
 
     const requiresRx = session.metadata?.requires_rx === "true";
+    const intakeToken = requiresRx ? generateIntakeToken() : null;
 
     const { data: orderRow, error: orderErr } = await svc
       .from("orders")
@@ -131,7 +134,10 @@ export async function POST(req: Request) {
           typeof session.payment_intent === "string"
             ? session.payment_intent
             : session.payment_intent?.id ?? null,
-        metadata: { stripe_session: session.id },
+        metadata: {
+          stripe_session: session.id,
+          ...(intakeToken ? { intake_token: intakeToken } : {}),
+        },
       })
       .select("id")
       .single();
@@ -144,7 +150,11 @@ export async function POST(req: Request) {
     const orderId = orderRow.id as string;
 
     for (const line of lines) {
-      const { data: prod } = await svc.from("products").select("id, price_cents").eq("slug", line.slug).maybeSingle();
+      const { data: prod } = await svc
+        .from("products")
+        .select("id, price_cents, inventory_count")
+        .eq("slug", line.slug)
+        .maybeSingle();
       if (!prod?.id) continue;
       await svc.from("order_items").insert({
         order_id: orderId,
@@ -152,6 +162,8 @@ export async function POST(req: Request) {
         quantity: line.quantity,
         unit_price_cents: prod.price_cents,
       });
+      const nextInv = Math.max(0, (prod.inventory_count ?? 0) - line.quantity);
+      await svc.from("products").update({ inventory_count: nextInv }).eq("id", prod.id);
     }
 
     if (requiresRx) {
@@ -183,6 +195,18 @@ export async function POST(req: Request) {
         metadata: { session_id: session.id },
       });
     }
+
+    const { data: custRow } = await svc.from("customers").select("sms_number").eq("id", customerId).maybeSingle();
+
+    void notifyOrderConfirmation({
+      email: email.toLowerCase(),
+      orderId,
+      totalCents: session.amount_total ?? 0,
+      currency: session.currency ?? "usd",
+      requiresRx,
+      intakeToken: intakeToken ?? undefined,
+      smsNumber: custRow?.sms_number ?? null,
+    });
   }
 
   return NextResponse.json({ received: true });

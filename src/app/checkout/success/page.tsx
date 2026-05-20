@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { CheckoutSuccessClient } from "./checkout-success-client";
+
 export const dynamic = "force-dynamic";
 
 export default function CheckoutSuccessPage({
@@ -12,9 +14,10 @@ export default function CheckoutSuccessPage({
     <main className="mx-auto max-w-lg px-4 py-16 text-center sm:px-6">
       <h1 className="font-serif text-3xl font-semibold text-green-800">Thank you!</h1>
       <p className="mt-4 text-sm text-muted-foreground">
-        Your payment was submitted through Stripe. If your order included prescription items, it will
-        stay in <strong>Pending approval</strong> until Nicole signs off.
+        Your payment was submitted through Stripe. If your order included prescription items, complete the intake
+        form below so Nicole can review it.
       </p>
+      <CheckoutSuccessClient sessionId={sid} />
       {sid ? (
         <p className="mt-2 break-all text-xs text-muted-foreground">
           Session <code>{sid}</code>

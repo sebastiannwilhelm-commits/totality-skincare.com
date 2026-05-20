@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { SITE } from "@/config/store";
 
 import { TrackOrderAuthActions } from "./track-order-auth-actions";
+import { TrackOrderLookup } from "./track-order-lookup";
 
 export const metadata = {
   title: "Track order",
@@ -22,14 +23,14 @@ export default function TrackOrderPage() {
       </nav>
       <h1 className="mt-4 font-serif text-3xl font-semibold text-[hsl(222,47%,18%)]">Track your order</h1>
       <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-        The live store uses Shopify&apos;s Tracktor app at the same URL pattern customers already
-        expect. After Shippo + your order model ship, this page can accept an order token and show
-        native tracking.
+        Look up orders placed on this storefront by email and order ID. Legacy Shopify orders can still use the
+        Tracktor link below.
       </p>
+      <TrackOrderLookup />
       <div className="mt-8 flex flex-wrap gap-3">
-        <Button asChild variant="blush" size="lg">
+        <Button asChild variant="outline" size="lg">
           <a href={SITE.legacyOrderTrackingUrl} target="_blank" rel="noreferrer">
-            Open order tracking (Shopify)
+            Legacy Shopify tracking
           </a>
         </Button>
       </div>

@@ -5,42 +5,41 @@ import { createAdminDataClient } from "@/lib/supabase/admin-data";
 
 export const dynamic = "force-dynamic";
 
-type OrderRow = {
-  id: string;
-  status: string;
-  total_cents: number;
-  currency: string;
-  requires_prescription_review: boolean;
-  created_at: string;
-  customers: { email: string } | { email: string }[] | null;
-};
-
-export default async function AdminOrdersPage() {
+export default async function AdminPrescriptionsPage() {
   const supabase = createAdminDataClient();
-
   const { data, error } = await supabase
     .from("orders")
-    .select("id, status, total_cents, currency, requires_prescription_review, created_at, customers ( email )")
+    .select("id, status, total_cents, currency, created_at, customers ( email ), prescriptions ( authorized_by_nicole, form_data )")
+    .eq("requires_prescription_review", true)
+    .in("status", ["pending_approval", "authorized"])
     .order("created_at", { ascending: false })
-    .limit(100);
+    .limit(50);
 
   if (error) {
     return (
       <div>
-        <h1 className="font-serif text-2xl font-semibold">Orders</h1>
+        <h1 className="font-serif text-2xl font-semibold">Prescriptions</h1>
         <p className="mt-4 text-sm text-red-300">{error.message}</p>
       </div>
     );
   }
 
-  const orders = (data ?? []) as OrderRow[];
+  type Row = {
+    id: string;
+    status: string;
+    total_cents: number;
+    currency: string;
+    created_at: string;
+    customers: { email: string } | { email: string }[] | null;
+    prescriptions: { authorized_by_nicole: boolean; form_data: Record<string, unknown> } | { authorized_by_nicole: boolean; form_data: Record<string, unknown> }[] | null;
+  };
+
+  const rows = (data ?? []) as Row[];
 
   return (
     <div>
-      <h1 className="font-serif text-2xl font-semibold">Orders</h1>
-      <p className="mt-2 text-sm text-stone-400">
-        Paid and prescription-pending orders. Detail view and status changes ship in Phase 1.
-      </p>
+      <h1 className="font-serif text-2xl font-semibold">Prescription queue</h1>
+      <p className="mt-2 text-sm text-stone-400">Orders awaiting intake and Nicole review.</p>
       <div className="mt-6 overflow-x-auto rounded-lg border border-white/10">
         <table className="w-full min-w-[640px] text-left text-sm">
           <thead className="border-b border-white/10 bg-white/5 text-xs uppercase text-stone-400">
@@ -48,36 +47,37 @@ export default async function AdminOrdersPage() {
               <th className="px-3 py-2">Created</th>
               <th className="px-3 py-2">Customer</th>
               <th className="px-3 py-2">Status</th>
+              <th className="px-3 py-2">Intake</th>
               <th className="px-3 py-2">Total</th>
-              <th className="px-3 py-2">Rx</th>
               <th className="px-3 py-2" />
             </tr>
           </thead>
           <tbody>
-            {orders.length === 0 ? (
+            {rows.length === 0 ? (
               <tr>
                 <td colSpan={6} className="px-3 py-8 text-center text-stone-500">
-                  No orders yet. Complete a Stripe test checkout to populate this list.
+                  No prescription orders in queue.
                 </td>
               </tr>
             ) : (
-              orders.map((row) => {
+              rows.map((row) => {
                 const cust = row.customers;
                 const email = (Array.isArray(cust) ? cust[0]?.email : cust?.email) ?? "—";
+                const rx = Array.isArray(row.prescriptions) ? row.prescriptions[0] : row.prescriptions;
+                const fd = (rx?.form_data ?? {}) as Record<string, unknown>;
+                const intake = fd.submitted_at ? "Submitted" : "Pending";
                 return (
-                  <tr key={row.id} className="border-b border-white/5 hover:bg-white/5">
+                  <tr key={row.id} className="border-b border-white/5">
                     <td className="px-3 py-2 whitespace-nowrap text-stone-300">
                       {new Date(row.created_at).toLocaleString()}
                     </td>
                     <td className="px-3 py-2">{email}</td>
-                    <td className="px-3 py-2">
-                      <span className="rounded bg-white/10 px-2 py-0.5 text-xs">{row.status}</span>
-                    </td>
+                    <td className="px-3 py-2">{row.status}</td>
+                    <td className="px-3 py-2">{intake}</td>
                     <td className="px-3 py-2">{formatMoney(row.total_cents, row.currency)}</td>
-                    <td className="px-3 py-2">{row.requires_prescription_review ? "Yes" : "—"}</td>
                     <td className="px-3 py-2">
-                      <Link href={`/admin/orders/${row.id}`} className="underline hover:text-white">
-                        View
+                      <Link href={`/admin/orders/${row.id}`} className="text-stone-200 underline hover:text-white">
+                        Review
                       </Link>
                     </td>
                   </tr>
@@ -87,12 +87,6 @@ export default async function AdminOrdersPage() {
           </tbody>
         </table>
       </div>
-      <p className="mt-4 text-xs text-stone-500">
-        Stripe session audit:{" "}
-        <Link href="/admin/checkouts" className="underline hover:text-stone-300">
-          Checkouts
-        </Link>
-      </p>
     </div>
   );
 }

@@ -9,9 +9,10 @@ import { formatMoney, SITE } from "@/config/store";
 import { STRIPE_SERVER_CHECKOUT_ENV_HELP } from "@/lib/stripe/config-help";
 import { SUPABASE_SERVER_CHECKOUT_ENV_HELP } from "@/lib/supabase/config-help";
 
-function mapCheckoutErrorMessage(code: string | undefined): string {
+function mapCheckoutErrorMessage(code: string | undefined, slug?: string): string {
   if (code === "stripe_not_configured") return STRIPE_SERVER_CHECKOUT_ENV_HELP;
   if (code === "supabase_not_configured") return SUPABASE_SERVER_CHECKOUT_ENV_HELP;
+  if (code === "out_of_stock") return slug ? `“${slug}” is out of stock.` : "An item in your cart is out of stock.";
   return code ?? "checkout_failed";
 }
 
@@ -46,13 +47,13 @@ export function CheckoutClient({ stripeConfigured, supabaseForCartConfigured }: 
           mode: "payment",
         }),
       });
-      const data = (await res.json()) as { url?: string; error?: string };
+      const data = (await res.json()) as { url?: string; error?: string; slug?: string };
       if (!res.ok) {
         const raw = data.error ?? "checkout_failed";
         if (raw === "stripe_not_configured" || raw === "supabase_not_configured") {
           setStripeErr(mapCheckoutErrorMessage(raw));
         } else {
-          setErr(mapCheckoutErrorMessage(raw));
+          setErr(mapCheckoutErrorMessage(raw, data.slug));
         }
         return;
       }
