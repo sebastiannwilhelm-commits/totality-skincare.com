@@ -1,9 +1,10 @@
 /**
- * Reads Shopify `collections/all/products.json` dumps (shopify-p*.json)
- * and writes `src/config/catalog-products.ts`.
+ * Fetches Shopify `collections/all/products.json` from the live Totality store
+ * (or reads shopify-p*.json dumps in repo root) and writes `src/config/catalog-products.ts`.
  *
- * Usage: place shopify-p1.json … shopify-pN.json in repo root, then:
- *   node scripts/generate-catalog.mjs
+ * Usage:
+ *   node scripts/generate-catalog.mjs           # fetch live (default)
+ *   node scripts/generate-catalog.mjs --offline # use shopify-p*.json only
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -12,17 +13,49 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, "..");
 
-const JSON_FILES = fs
-  .readdirSync(root)
-  .filter((f) => /^shopify-p\d+\.json$/i.test(f))
-  .sort((a, b) => Number(a.match(/\d+/)[0]) - Number(b.match(/\d+/)[0]));
-
-if (!JSON_FILES.length) {
-  console.error("No shopify-p*.json files in repo root.");
-  process.exit(1);
-}
+const LIVE_PRODUCTS_URL =
+  "https://totality-skincare.com/collections/all/products.json";
 
 /** @typedef {{ handle: string; title: string; body_html?: string; vendor?: string; product_type?: string; tags?: string[]; variants: { position: number; price: string; available: boolean }[]; images: { src: string }[] }} ShopifyProduct */
+
+const offline = process.argv.includes("--offline");
+
+/** @returns {Promise<ShopifyProduct[]>} */
+async function fetchLiveProducts() {
+  const all = [];
+  for (let page = 1; page <= 20; page++) {
+    const url = `${LIVE_PRODUCTS_URL}?limit=250&page=${page}`;
+    const res = await fetch(url, { headers: { "User-Agent": "totality-catalog-sync/1.0" } });
+    if (!res.ok) throw new Error(`HTTP ${res.status} fetching ${url}`);
+    const j = await res.json();
+    const products = j.products || [];
+    if (!products.length) break;
+    all.push(...products);
+    console.log(`Fetched page ${page}: ${products.length} products (${all.length} total)`);
+    if (products.length < 250) break;
+  }
+  return all;
+}
+
+/** @returns {ShopifyProduct[]} */
+function readLocalDumps() {
+  const JSON_FILES = fs
+    .readdirSync(root)
+    .filter((f) => /^shopify-p\d+\.json$/i.test(f))
+    .sort((a, b) => Number(a.match(/\d+/)[0]) - Number(b.match(/\d+/)[0]));
+
+  if (!JSON_FILES.length) {
+    console.error("No shopify-p*.json files in repo root.");
+    process.exit(1);
+  }
+
+  const all = [];
+  for (const f of JSON_FILES) {
+    const j = JSON.parse(fs.readFileSync(path.join(root, f), "utf8"));
+    all.push(...j.products);
+  }
+  return all;
+}
 
 /** @param {string} v */
 function slugify(v) {
@@ -105,17 +138,32 @@ function firstImage(p) {
   return "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&w=720&q=80&sig=placeholder";
 }
 
-const all = [];
-for (const f of JSON_FILES) {
-  const j = JSON.parse(fs.readFileSync(path.join(root, f), "utf8"));
-  all.push(...j.products);
+/** @param {ShopifyProduct[]} products */
+function filterSellable(products) {
+  return products.filter((p) => {
+    if (p.vendor === "Monster-ShipProtect") return false;
+    if (/shipping protection/i.test(p.title)) return false;
+    return true;
+  });
 }
 
-const filtered = all.filter((p) => {
-  if (p.vendor === "Monster-ShipProtect") return false;
-  if (/shipping protection/i.test(p.title)) return false;
-  return true;
-});
+let raw;
+if (offline) {
+  console.log("Reading local shopify-p*.json dumps…");
+  raw = readLocalDumps();
+} else {
+  console.log(`Fetching live catalog from ${LIVE_PRODUCTS_URL}…`);
+  try {
+    raw = await fetchLiveProducts();
+  } catch (err) {
+    console.error("Live fetch failed:", err.message);
+    console.error("Retry with --offline if you have shopify-p*.json dumps.");
+    process.exit(1);
+  }
+}
+
+const filtered = filterSellable(raw);
+console.log(`Source: ${raw.length} products → ${filtered.length} sellable (excluded ${raw.length - filtered.length} non-products)`);
 
 /** @type {Map<string, { slug: string; label: string }>} */
 const brandBySlug = new Map();
