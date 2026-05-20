@@ -17,7 +17,7 @@ export default async function AdminHomePage() {
     { label: "Leads", value: leadCount ?? 0, href: "/admin/leads" },
     { label: "Quiz sessions", value: quizCount ?? 0, href: "/admin/quiz" },
     { label: "Stripe checkouts", value: checkoutCount ?? 0, href: "/admin/checkouts" },
-    { label: "Orders", value: orderCount ?? 0, href: "/admin/analytics" },
+    { label: "Orders", value: orderCount ?? 0, href: "/admin/orders" },
   ];
 
   return (
