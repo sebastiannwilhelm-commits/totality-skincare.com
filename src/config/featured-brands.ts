@@ -57,6 +57,20 @@ export const FEATURED_BRANDS: {
   { slug: "hydrinity", label: "Hydrinity", logoSrc: `${CDN}/Hydrinity_2000x.png?v=1700476977` },
 ];
 
+/** Primary brands in header nav — matches totality-skincare.com mega-menu highlights. */
+export const NAV_BRANDS: { slug: string; label: string }[] = [
+  { slug: "obagi", label: "Obagi" },
+  { slug: "skinceuticals", label: "SkinCeuticals" },
+  { slug: "upneeq", label: "UPNEEQ" },
+  { slug: "eltamd", label: "EltaMD" },
+  { slug: "skinmedica", label: "SkinMedica" },
+  { slug: "isclinical", label: "isClinical" },
+  { slug: "zo-skin", label: "ZO Skin Health" },
+  { slug: "glymed-plus", label: "GlyMed Plus" },
+  { slug: "dermalogica", label: "Dermalogica" },
+  { slug: "colorescience", label: "Colorescience" },
+];
+
 export function featuredBrandHref(brand: (typeof FEATURED_BRANDS)[number]): string {
   if (brand.legacyCollection) {
     return `${LEGACY_STORE_URL}/collections/${brand.legacyCollection}`;

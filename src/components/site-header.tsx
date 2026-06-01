@@ -5,7 +5,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { Heart, Menu, Search, ShoppingBag, X } from "lucide-react";
 
-import { BRANDS, CONCERNS, LEGACY_STORE_URL, SITE } from "@/config/store";
+import { NAV_BRANDS } from "@/config/featured-brands";
+import { CONCERNS, LEGACY_STORE_URL, SITE } from "@/config/store";
+import { NavHoverMenu, NavHoverMenuLink } from "@/components/nav-hover-menu";
 import { useCart } from "@/context/cart-context";
 import { useWishlist } from "@/context/wishlist-context";
 import { PRODUCTS } from "@/config/store";
@@ -39,8 +41,8 @@ export function SiteHeader() {
   return (
     <HeaderSupabaseAuthProvider>
       <>
-      <header className="sticky top-0 z-40 border-b border-[hsl(350,30%,88%)] bg-white/90 backdrop-blur-md">
-        <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4 sm:h-16 sm:px-6">
+      <header className="sticky top-0 z-40 overflow-visible border-b border-[hsl(350,30%,88%)] bg-white/90 backdrop-blur-md">
+        <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 overflow-visible px-4 sm:h-16 sm:px-6">
           <button
             type="button"
             className="rounded-md p-2 text-[hsl(222,47%,18%)] lg:hidden"
@@ -56,55 +58,29 @@ export function SiteHeader() {
             </span>
           </Link>
 
-          <nav className="hidden min-w-0 flex-1 flex-nowrap items-center justify-center gap-4 text-sm font-medium text-[hsl(222,30%,32%)] xl:gap-6 lg:flex">
+          <nav className="hidden min-w-0 flex-1 flex-nowrap items-center justify-center gap-4 overflow-visible text-sm font-medium text-[hsl(222,30%,32%)] xl:gap-6 lg:flex">
             <Link
               href="/shop"
               className="shrink-0 whitespace-nowrap transition hover:text-[hsl(222,47%,18%)]"
             >
               Shop all
             </Link>
-            <div className="group relative shrink-0">
-              <button
-                type="button"
-                className="flex items-center gap-1 whitespace-nowrap transition hover:text-[hsl(222,47%,18%)]"
-              >
-                Brands
-              </button>
-              <div className="pointer-events-none invisible absolute left-0 top-full z-50 pt-2 opacity-0 transition group-hover:pointer-events-auto group-hover:visible group-hover:opacity-100">
-                <div className="min-w-[12rem] rounded-md border bg-white py-2 shadow-lg">
-                  {BRANDS.map((b) => (
-                    <Link
-                      key={b.slug}
-                      href={`/collections/brand/${b.slug}`}
-                      className="block px-4 py-2 text-sm hover:bg-[hsl(350,85%,96%)]"
-                    >
-                      {b.label}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </div>
-            <div className="group relative shrink-0">
-              <button
-                type="button"
-                className="whitespace-nowrap transition hover:text-[hsl(222,47%,18%)]"
-              >
-                Concerns
-              </button>
-              <div className="pointer-events-none invisible absolute left-0 top-full z-50 pt-2 opacity-0 transition group-hover:pointer-events-auto group-hover:visible group-hover:opacity-100">
-                <div className="min-w-[14rem] rounded-md border bg-white py-2 shadow-lg">
-                  {CONCERNS.map((c) => (
-                    <Link
-                      key={c.slug}
-                      href={`/collections/concern/${c.slug}`}
-                      className="block px-4 py-2 text-sm hover:bg-[hsl(350,85%,96%)]"
-                    >
-                      {c.label}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </div>
+            <NavHoverMenu label="Brands">
+              {NAV_BRANDS.map((b) => (
+                <NavHoverMenuLink key={b.slug} href={`/collections/brand/${b.slug}`}>
+                  {b.label}
+                </NavHoverMenuLink>
+              ))}
+              <div className="my-1 border-t border-[hsl(350,30%,90%)]" />
+              <NavHoverMenuLink href="/shop">Shop all brands</NavHoverMenuLink>
+            </NavHoverMenu>
+            <NavHoverMenu label="Concerns">
+              {CONCERNS.map((c) => (
+                <NavHoverMenuLink key={c.slug} href={`/collections/concern/${c.slug}`}>
+                  {c.label}
+                </NavHoverMenuLink>
+              ))}
+            </NavHoverMenu>
             <Link
               href="/pages/skin-care-quiz"
               className="shrink-0 whitespace-nowrap transition hover:text-[hsl(222,47%,18%)]"
@@ -291,7 +267,7 @@ export function SiteHeader() {
             <p className="px-3 pt-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Brands
             </p>
-            {BRANDS.map((b) => (
+            {NAV_BRANDS.map((b) => (
               <Link
                 key={b.slug}
                 href={`/collections/brand/${b.slug}`}
@@ -301,6 +277,13 @@ export function SiteHeader() {
                 {b.label}
               </Link>
             ))}
+            <Link
+              href="/shop"
+              onClick={() => setOpen(false)}
+              className="rounded-md px-3 py-2 font-medium text-[hsl(222,47%,26%)] hover:bg-muted"
+            >
+              Shop all brands
+            </Link>
             <p className="px-3 pt-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Concerns
             </p>
