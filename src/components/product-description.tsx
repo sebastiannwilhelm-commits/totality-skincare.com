@@ -18,22 +18,25 @@ export function ProductDescription({ html }: ProductDescriptionProps) {
   }
 
   return (
-    <div className="product-description mt-6 min-w-0 max-w-full truncate has-padding-top">
-      <div
-        className={cn(
-          "description product_description_part_small content truncate__long",
-          expanded && "active",
-        )}
-        dangerouslySetInnerHTML={{ __html: trimmed }}
-      />
-      <button
-        type="button"
-        className={cn("readmore_btn button button--primary mt-4", expanded && "active-btn")}
-        onClick={() => setExpanded((v) => !v)}
-        aria-expanded={expanded}
-      >
-        More Details
-      </button>
+    <div className="product-description mt-6 min-w-0 max-w-full">
+      <div className="truncate">
+        <div
+          className={cn(
+            "description product_description_part_small content truncate__long has-padding-top",
+            expanded && "active",
+          )}
+          data-truncate="long"
+          dangerouslySetInnerHTML={{ __html: trimmed }}
+        />
+        <button
+          type="button"
+          className={cn("readmore_btn button button--primary", expanded && "active-btn")}
+          onClick={() => setExpanded((v) => !v)}
+          aria-expanded={expanded}
+        >
+          More Details
+        </button>
+      </div>
     </div>
   );
 }

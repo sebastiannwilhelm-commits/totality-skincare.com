@@ -64,44 +64,73 @@
   }
 }
 
-/* Totality Shopify PDP description — matches theme truncate (110px) + More Details */
-.product-description.has-padding-top {
+/* Totality Shopify PDP description — port of theme custom.css truncate + readmore */
+/* Neutralize Tailwind `.truncate` on the Shopify wrapper div */
+.product-description > .truncate {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+}
+
+.product-description .description.product_description_part_small.has-padding-top {
   padding-top: 1rem;
 }
 
-.product-description .description.product_description_part_small.content.truncate__long:not(.active) {
+.product-description .description.product_description_part_small {
   height: 110px;
   overflow: hidden;
   transition: height 0.25s ease-in;
 }
 
-.product-description .description.product_description_part_small.content.truncate__long.active {
+.product-description .description.product_description_part_small.active {
   height: auto;
   overflow: visible;
 }
 
-.product-description .readmore_btn.button.button--primary {
-  display: inline-flex;
-  cursor: pointer;
-  align-items: center;
-  justify-content: center;
-  border-radius: 0.25rem;
+.product-description .readmore_btn {
+  position: relative;
+  display: inline-block;
+  width: auto;
+  margin-top: 0.75rem;
+  padding: 0 1.875rem 0 0;
   border: none;
-  background-color: hsl(222 47% 18%);
-  color: hsl(0 0% 98%);
-  padding: 0.625rem 1.25rem;
-  font-size: 0.875rem;
-  font-weight: 600;
+  background: transparent;
+  color: hsl(222 47% 11%);
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.4;
+  text-transform: uppercase;
   letter-spacing: 0.02em;
-  transition: opacity 0.15s ease;
+  cursor: pointer;
+  box-shadow: none;
 }
 
-.product-description .readmore_btn.button.button--primary:hover {
-  opacity: 0.9;
+.product-description .readmore_btn::before,
+.product-description .readmore_btn::after {
+  position: absolute;
+  top: 44%;
+  right: 9px;
+  width: 10px;
+  height: 2px;
+  border-radius: 0;
+  background: hsl(222 47% 11%);
+  content: "";
+  transition: transform 0.5s ease;
 }
 
-.product-description .readmore_btn.active-btn {
-  opacity: 0.85;
+.product-description .readmore_btn:hover::before,
+.product-description .readmore_btn:hover::after {
+  background: hsl(222 47% 35%);
+}
+
+.product-description .readmore_btn.active-btn::after {
+  transform-origin: center;
+  transform: rotate(90deg);
+}
+
+.product-description .readmore_btn:focus-visible {
+  outline: 2px solid hsl(222 47% 18%);
+  outline-offset: 2px;
 }
 
 /* Scoped reset so Tailwind preflight does not flatten Shopify markup */
@@ -124,6 +153,12 @@
   max-width: min(240px, 100%);
   height: auto;
   margin: 0.5rem 0;
+}
+
+.product-description .product_description_part_small ul[data-rte-list],
+.product-description .product_description_part_small ul[data-rte-list="default"] {
+  list-style: disc;
+  padding-left: 1.35rem;
 }
 
 .product-description .product_description_part_small [style*="white-space"] {
