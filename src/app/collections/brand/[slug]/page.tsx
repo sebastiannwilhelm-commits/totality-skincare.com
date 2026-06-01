@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { ProductCard } from "@/components/home/product-grid";
+import { PaginatedProductListing } from "@/components/paginated-product-listing";
 import { BRANDS, productsByBrand } from "@/config/store";
+import { parsePageParam } from "@/lib/pagination";
 
-type Props = { params: { slug: string } };
+type Props = { params: { slug: string }; searchParams: { page?: string } };
 
 export function generateStaticParams() {
   return BRANDS.map((b) => ({ slug: b.slug }));
@@ -15,10 +16,12 @@ export function generateMetadata({ params }: Props) {
   return { title: b ? `Brand: ${b.label}` : "Brand" };
 }
 
-export default function BrandCollectionPage({ params }: Props) {
+export default function BrandCollectionPage({ params, searchParams }: Props) {
   const meta = BRANDS.find((b) => b.slug === params.slug);
   if (!meta) notFound();
   const list = productsByBrand(params.slug);
+  const page = parsePageParam(searchParams.page);
+  const basePath = `/collections/brand/${params.slug}`;
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
@@ -30,15 +33,12 @@ export default function BrandCollectionPage({ params }: Props) {
         <span className="text-foreground">{meta.label}</span>
       </nav>
       <h1 className="mt-4 font-serif text-3xl font-semibold text-[hsl(222,47%,18%)]">{meta.label}</h1>
-      {list.length === 0 ? (
-        <p className="mt-10 text-sm text-muted-foreground">No products for this brand in the seed catalog.</p>
-      ) : (
-        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {list.map((p) => (
-            <ProductCard key={p.slug} product={p} />
-          ))}
-        </div>
-      )}
+      <PaginatedProductListing
+        products={list}
+        page={page}
+        basePath={basePath}
+        emptyMessage="No products for this brand in the seed catalog."
+      />
     </main>
   );
 }

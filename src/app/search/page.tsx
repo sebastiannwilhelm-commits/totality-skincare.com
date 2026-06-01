@@ -1,7 +1,8 @@
 import Link from "next/link";
 
-import { ProductCard } from "@/components/home/product-grid";
+import { PaginatedProductListing } from "@/components/paginated-product-listing";
 import { PRODUCTS } from "@/config/store";
+import { parsePageParam } from "@/lib/pagination";
 
 export const metadata = {
   title: "Search",
@@ -18,6 +19,7 @@ export default function SearchPage({
   searchParams: Record<string, string | string[] | undefined>;
 }) {
   const q = normalizeQ(searchParams.q);
+  const page = parsePageParam(searchParams.page);
   const results = !q
     ? []
     : PRODUCTS.filter(
@@ -27,6 +29,7 @@ export default function SearchPage({
           p.brand.toLowerCase().includes(q) ||
           p.concerns.some((c) => c.includes(q)),
       );
+  const basePath = q ? `/search?q=${encodeURIComponent(q)}` : "/search";
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
@@ -49,17 +52,15 @@ export default function SearchPage({
       ) : (
         <>
           <p className="mt-2 text-sm text-muted-foreground">
-            Results for <span className="font-medium text-foreground">&ldquo;{q}&rdquo;</span> ({results.length})
+            Results for <span className="font-medium text-foreground">&ldquo;{q}&rdquo;</span> (
+            {results.length})
           </p>
-          {results.length === 0 ? (
-            <p className="mt-8 text-sm text-muted-foreground">No products match that query.</p>
-          ) : (
-            <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {results.map((p) => (
-                <ProductCard key={p.slug} product={p} />
-              ))}
-            </div>
-          )}
+          <PaginatedProductListing
+            products={results}
+            page={page}
+            basePath={basePath}
+            emptyMessage="No products match that query."
+          />
         </>
       )}
     </main>

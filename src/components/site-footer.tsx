@@ -64,9 +64,14 @@ export function SiteFooter() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/account" className="hover:underline">
+                  <a
+                    href={SITE.legacyRewardsUrl}
+                    className="hover:underline"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
                     My Rewards
-                  </Link>
+                  </a>
                 </li>
                 <li>
                   <a
@@ -121,8 +126,18 @@ export function SiteFooter() {
                   </a>
                 </li>
                 <li>
-                  <Link href="/pages/track-order" className="hover:underline">
+                  <a
+                    href={SITE.legacyOrderTrackingUrl}
+                    className="hover:underline"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
                     Track an Order
+                  </a>
+                </li>
+                <li>
+                  <Link href="/pages/track-order" className="text-muted-foreground hover:underline">
+                    New storefront orders
                   </Link>
                 </li>
               </ul>

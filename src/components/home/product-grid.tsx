@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { formatMoney, PRODUCTS } from "@/config/store";
+import { bestSellerProducts, formatMoney } from "@/config/store";
 import type { StoreProduct } from "@/lib/types";
 
 import { WishlistHeartButton } from "@/components/wishlist-heart-button";
@@ -42,13 +42,15 @@ export function ProductCard({ product }: { product: StoreProduct }) {
 }
 
 export function BestSellersSection() {
+  const products = bestSellerProducts();
+
   return (
-    <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+    <section id="best-sellers" className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
       <h2 className="text-center text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground">
         Our best sellers
       </h2>
       <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {PRODUCTS.map((p) => (
+        {products.map((p) => (
           <ProductCard key={p.slug} product={p} />
         ))}
       </div>

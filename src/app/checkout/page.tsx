@@ -23,6 +23,12 @@ export default function CheckoutPage() {
       <div className="mt-8">
         <CheckoutClient stripeConfigured={stripeConfigured} supabaseForCartConfigured={supabaseForCartConfigured} />
       </div>
+      {!cartPayReady ? (
+        <p className="mt-6 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">
+          Set Stripe and Supabase env vars on Vercel to enable payments. See{" "}
+          <code className="text-xs">docs/vercel-env-setup.md</code> in the repo.
+        </p>
+      ) : null}
       <p className="mt-8 text-xs text-muted-foreground">
         <Link href="/subscribe" className="underline-offset-4 hover:underline">
           Prefer a monthly subscription box?

@@ -255,3 +255,17 @@ const descPath = path.join(root, "src", "data", "catalog-descriptions.json");
 fs.mkdirSync(path.dirname(descPath), { recursive: true });
 fs.writeFileSync(descPath, JSON.stringify(descriptions), "utf8");
 console.log(`Wrote ${descPath} (${Object.keys(descriptions).length} HTML descriptions)`);
+
+const images = {};
+const shopifyIds = {};
+for (const p of filtered) {
+  const srcs = (p.images || []).map((i) => i.src).filter(Boolean);
+  if (srcs.length) images[p.handle] = srcs;
+  if (p.id) shopifyIds[p.handle] = String(p.id);
+}
+const imagesPath = path.join(root, "src", "data", "catalog-images.json");
+fs.writeFileSync(imagesPath, JSON.stringify(images), "utf8");
+console.log(`Wrote ${imagesPath} (${Object.keys(images).length} products with images)`);
+const idsPath = path.join(root, "src", "data", "catalog-shopify-ids.json");
+fs.writeFileSync(idsPath, JSON.stringify(shopifyIds), "utf8");
+console.log(`Wrote ${idsPath} (${Object.keys(shopifyIds).length} Shopify product IDs)`);

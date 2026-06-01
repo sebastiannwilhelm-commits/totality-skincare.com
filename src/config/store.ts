@@ -1,4 +1,5 @@
 import type { ConcernSlug, StoreProduct } from "@/lib/types";
+import { BEST_SELLER_SLUGS } from "@/config/best-sellers";
 import { CATALOG_BRANDS, CATALOG_PRODUCTS } from "@/config/catalog-products";
 
 /** Canonical public storefront (legacy Shopify until cutover). */
@@ -7,6 +8,10 @@ export const LEGACY_STORE_URL = "https://totality-skincare.com" as const;
 export const SITE = {
   name: "Totality Skincare",
   tagline: "Totality Medispa & Skincare",
+  logoSrc:
+    "https://totality-skincare.com/cdn/shop/files/Totality-Skin-Care-Logo_2000x.png?v=1692597087",
+  /** Judge.me + Shopify product widgets */
+  shopifyDomain: "totality-skincare.myshopify.com",
   copyrightName: "Totality Medispa and Skincare",
   contactEmail: "info@totality-skincare.com",
   phoneDisplay: "(843) 998-7405",
@@ -18,6 +23,7 @@ export const SITE = {
   legacyQuizUrl: `${LEGACY_STORE_URL}/pages/skin-care-quiz`,
   /** Shopify Tracktor app — same entry customers use today. */
   legacyOrderTrackingUrl: `${LEGACY_STORE_URL}/apps/tracktor/track`,
+  legacyRewardsUrl: `${LEGACY_STORE_URL}/pages/rewards`,
   legacyBlogNewsUrl: `${LEGACY_STORE_URL}/blogs/news`,
   policies: {
     refund: `${LEGACY_STORE_URL}/policies/refund-policy`,
@@ -44,6 +50,21 @@ export const PRODUCTS: StoreProduct[] = CATALOG_PRODUCTS;
 
 export function productBySlug(slug: string): StoreProduct | undefined {
   return PRODUCTS.find((p) => p.slug === slug);
+}
+
+export function bestSellerProducts(): StoreProduct[] {
+  return BEST_SELLER_SLUGS.map((slug) => productBySlug(slug)).filter(
+    (p): p is StoreProduct => p !== undefined,
+  );
+}
+
+/** Hair / makeup filters for shop nav (product_type from Shopify catalog). */
+export function productsByProductType(match: "hair" | "makeup"): StoreProduct[] {
+  const re =
+    match === "hair"
+      ? /\bhair\b/i
+      : /\bmakeup|lip|lash|brow|nail|cosmetic|liner|lipstick|mascara\b/i;
+  return PRODUCTS.filter((p) => re.test(p.name) || re.test(p.description));
 }
 
 export function productsByBrand(brandSlug: string): StoreProduct[] {

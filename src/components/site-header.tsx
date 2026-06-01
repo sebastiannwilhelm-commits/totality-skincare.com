@@ -6,7 +6,8 @@ import Link from "next/link";
 import { Heart, Menu, Search, ShoppingBag, X } from "lucide-react";
 
 import { NAV_BRANDS } from "@/config/featured-brands";
-import { CONCERNS, LEGACY_STORE_URL, SITE } from "@/config/store";
+import { SHOP_NAV_LINKS } from "@/config/shop-nav";
+import { CONCERNS, SITE } from "@/config/store";
 import { NavHoverMenu, NavHoverMenuLink } from "@/components/nav-hover-menu";
 import { useCart } from "@/context/cart-context";
 import { useWishlist } from "@/context/wishlist-context";
@@ -53,18 +54,24 @@ export function SiteHeader() {
           </button>
 
           <Link href="/" className="flex min-w-0 flex-1 items-center gap-2 lg:flex-none">
-            <span className="truncate font-semibold tracking-tight text-[hsl(222,47%,18%)] sm:text-lg">
-              {SITE.name}
-            </span>
+            <Image
+              src={SITE.logoSrc}
+              alt={SITE.name}
+              width={160}
+              height={40}
+              className="h-8 w-auto max-w-[10rem] object-contain sm:h-9"
+              priority
+            />
           </Link>
 
           <nav className="hidden min-w-0 flex-1 flex-nowrap items-center justify-center gap-4 overflow-visible text-sm font-medium text-[hsl(222,30%,32%)] xl:gap-6 lg:flex">
-            <Link
-              href="/shop"
-              className="shrink-0 whitespace-nowrap transition hover:text-[hsl(222,47%,18%)]"
-            >
-              Shop all
-            </Link>
+            <NavHoverMenu label="Shop">
+              {SHOP_NAV_LINKS.map((item) => (
+                <NavHoverMenuLink key={item.href} href={item.href}>
+                  {item.label}
+                </NavHoverMenuLink>
+              ))}
+            </NavHoverMenu>
             <NavHoverMenu label="Brands">
               {NAV_BRANDS.map((b) => (
                 <NavHoverMenuLink key={b.slug} href={`/collections/brand/${b.slug}`}>
@@ -106,12 +113,6 @@ export function SiteHeader() {
               Contact
             </Link>
             <HeaderSupabaseAuthDesktop />
-            <a
-              href={LEGACY_STORE_URL}
-              className="shrink-0 whitespace-nowrap text-xs font-normal text-muted-foreground transition hover:text-foreground"
-            >
-              Legacy store
-            </a>
           </nav>
 
           <div className="flex items-center gap-1 sm:gap-2">
@@ -241,9 +242,19 @@ export function SiteHeader() {
             </Button>
           </div>
           <nav className="flex flex-col gap-1 p-4 text-sm font-medium">
-            <Link href="/shop" onClick={() => setOpen(false)} className="rounded-md px-3 py-2 hover:bg-muted">
-              Shop all
-            </Link>
+            <p className="px-3 pt-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Shop
+            </p>
+            {SHOP_NAV_LINKS.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setOpen(false)}
+                className="rounded-md px-3 py-2 hover:bg-muted"
+              >
+                {item.label}
+              </Link>
+            ))}
             <Link
               href="/pages/skin-care-quiz"
               onClick={() => setOpen(false)}
