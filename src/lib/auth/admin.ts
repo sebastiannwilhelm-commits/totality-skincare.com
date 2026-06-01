@@ -22,10 +22,20 @@ async function tryFirebaseAllowlistSession(): Promise<AdminUser | null> {
   return { id: parsed.uid, email: parsed.email };
 }
 
+function firebaseAdminLoginConfigured(): boolean {
+  return getAdminEmailAllowlist().length > 0 && Boolean(process.env.ADMIN_SESSION_SECRET?.trim());
+}
+
 export async function requireAdminUser(): Promise<AdminUser> {
+  const fbUser = await tryFirebaseAllowlistSession();
+  if (fbUser) return fbUser;
+
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
   const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
   if (!url || !anon) {
+    if (firebaseAdminLoginConfigured()) {
+      redirect("/auth/login?next=/admin");
+    }
     redirect("/auth/login?next=/admin&error=config");
   }
 
@@ -55,8 +65,9 @@ export async function requireAdminUser(): Promise<AdminUser> {
     redirect("/?error=forbidden_admin");
   }
 
-  const fbUser = await tryFirebaseAllowlistSession();
-  if (fbUser) return fbUser;
+  if (firebaseAdminLoginConfigured()) {
+    redirect("/auth/login?next=/admin");
+  }
 
   redirect("/auth/login?next=/admin");
 }

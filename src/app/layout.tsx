@@ -3,7 +3,9 @@ import { Cormorant_Garamond, Inter } from "next/font/google";
 
 import { CookieConsent } from "@/components/cookie-consent";
 import { LeadCapturePopup } from "@/components/lead-capture-popup";
+import { FirebasePublicBootstrap } from "@/components/firebase-public-bootstrap";
 import { SupabasePublicBootstrap } from "@/components/supabase-public-bootstrap";
+import { getFirebasePublicEnv } from "@/lib/firebase/public-env";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { CartProvider } from "@/context/cart-context";
@@ -32,6 +34,9 @@ function resolveMetadataBase(): URL {
   return new URL("http://localhost:3000");
 }
 
+/** Read Firebase/Supabase public env at request time so bootstrap props are not baked in as empty at build. */
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   metadataBase: resolveMetadataBase(),
   title: {
@@ -48,12 +53,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const supabasePublic = getSupabasePublicEnv();
+  const firebasePublic = getFirebasePublicEnv();
 
   return (
     <html lang="en">
       <body
         className={`${inter.variable} ${cormorant.variable} min-h-screen bg-background font-sans antialiased`}
       >
+        {firebasePublic ? <FirebasePublicBootstrap {...firebasePublic} /> : null}
         {supabasePublic ? (
           <SupabasePublicBootstrap url={supabasePublic.url} anonKey={supabasePublic.anonKey} />
         ) : null}
