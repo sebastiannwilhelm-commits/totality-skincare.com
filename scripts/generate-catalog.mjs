@@ -91,6 +91,32 @@ function vendorDisplayLabel(p) {
 }
 
 /** @param {string | undefined} html */
+function normalizeProductHtml(html) {
+  if (!html) return "";
+  let h = html.trim();
+  h = h.replace(/[\u200B-\u200D\uFEFF]/g, "");
+  h = h.replace(/<div class="product_description">\s*<\/div>/gi, "");
+  h = h.replace(/\s*data-mce-fragment="[^"]*"/gi, "");
+  h = h.replace(/<span>\s*(?:&nbsp;|\u00a0)?\s*<\/span>/gi, " ");
+  h = h.replace(
+    /<h4([^>]*)>([^<]*)<\/h4>\s*((?:(?!<h[1-4])[\s\S])+?)(?=\s*<h[1-4]|\s*<div|\s*$)/gi,
+    (_match, attrs, title, body) => {
+      const text = body.trim();
+      if (!text || text.startsWith("<")) {
+        return `<h4${attrs}>${title}</h4>${body}`;
+      }
+      const parts = text.split(/[\u0007\u2022•]\s*/).map((s) => s.trim()).filter(Boolean);
+      if (parts.length > 1) {
+        return `<h4${attrs}>${title}</h4><ul class="list-column">${parts.map((item) => `<li>${item}</li>`).join("")}</ul>`;
+      }
+      return `<h4${attrs}>${title}</h4><p>${text}</p>`;
+    },
+  );
+  h = h.replace(/>\s+</g, "><");
+  return h;
+}
+
+/** @param {string | undefined} html */
 function plainDescription(html) {
   if (!html) return "";
   const t = html
@@ -223,7 +249,7 @@ console.log(`Wrote ${outPath} (${filtered.length} products, ${BRANDS.length} bra
 /** Full Shopify body_html for PDP — same content as totality-skincare.com “More Details” blocks. */
 const descriptions = {};
 for (const p of filtered) {
-  descriptions[p.handle] = p.body_html?.trim() || "";
+  descriptions[p.handle] = normalizeProductHtml(p.body_html || "");
 }
 const descPath = path.join(root, "src", "data", "catalog-descriptions.json");
 fs.mkdirSync(path.dirname(descPath), { recursive: true });

@@ -21,7 +21,7 @@ export function ProductDescription({ html }: ProductDescriptionProps) {
     <div className="product-description mt-6 truncate has-padding-top">
       <div
         className={cn(
-          "description product_description_part_small content truncate__long text-sm leading-relaxed text-[hsl(222,30%,32%)]",
+          "description product_description_part_small content truncate__long",
           expanded && "active",
         )}
         dangerouslySetInnerHTML={{ __html: trimmed }}

@@ -39,11 +39,18 @@ export default function ProductPage({ params }: Props) {
         <span className="mx-2">/</span>
         <span className="line-clamp-1 text-foreground">{p.name}</span>
       </nav>
-      <div className="mt-8 grid gap-10 lg:grid-cols-2 lg:gap-14">
-        <div className="relative aspect-square overflow-hidden rounded-xl border bg-muted">
-          <Image src={p.imageSrc} alt={p.name} fill className="object-cover" priority sizes="(max-width:1024px) 100vw, 50vw" />
+      <div className="mt-8 grid min-w-0 gap-10 lg:grid-cols-2 lg:gap-14">
+        <div className="relative aspect-square min-w-0 max-w-full overflow-hidden rounded-xl border bg-muted">
+          <Image
+            src={p.imageSrc}
+            alt={p.name}
+            fill
+            className="object-contain p-4 sm:object-cover sm:p-0"
+            priority
+            sizes="(max-width:1024px) 100vw, 50vw"
+          />
         </div>
-        <div>
+        <div className="min-w-0">
           <h1 className="font-serif text-3xl font-semibold leading-tight text-[hsl(222,47%,18%)] sm:text-4xl">
             {p.name}
           </h1>
