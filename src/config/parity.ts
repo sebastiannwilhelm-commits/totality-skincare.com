@@ -15,9 +15,9 @@ export const TOT_SKINCARE_PARITY: ParityRow[] = [
   {
     id: "home-hero-quiz",
     liveSource: "Home hero + “Match Me With the Right Products” → /pages/skin-care-quiz",
-    status: "partial",
+    status: "done",
     notes:
-      "Quiz page links to the live quiz until a native multi-step flow ships; hero CTA matches intent.",
+      "Octane AI embed (quiz id LIYfTYmw49oOSyrr, fullscreen) — same as Shopify page.",
   },
   {
     id: "sale-banner",

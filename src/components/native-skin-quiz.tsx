@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * Legacy native quiz (4 steps + Supabase logging). Totality’s live store uses Octane AI;
+ * see `octane-skin-quiz.tsx` and `/pages/skin-care-quiz`.
+ */
+
 import * as React from "react";
 import Link from "next/link";
 
