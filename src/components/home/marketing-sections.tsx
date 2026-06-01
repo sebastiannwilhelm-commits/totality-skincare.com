@@ -1,6 +1,8 @@
+import Image from "next/image";
 import Link from "next/link";
 
-import { BRANDS, CONCERNS } from "@/config/store";
+import { FEATURED_BRANDS, featuredBrandHref } from "@/config/featured-brands";
+import { CONCERNS } from "@/config/store";
 
 export function ShopByBrandSection() {
   return (
@@ -9,18 +11,37 @@ export function ShopByBrandSection() {
         <h2 className="text-center text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground">
           Shop by brands
         </h2>
-        <ul className="mt-10 flex flex-wrap justify-center gap-3">
-          {BRANDS.map((b) => (
-            <li key={b.slug}>
-              <Link
-                href={`/collections/brand/${b.slug}`}
-                className="inline-flex rounded-full border border-[hsl(350,40%,85%)] bg-[hsl(350,85%,97%)] px-5 py-2 text-sm font-medium text-[hsl(222,47%,18%)] transition hover:border-[hsl(222,47%,18%)]/30 hover:bg-white"
-              >
-                {b.label}
-              </Link>
-            </li>
-          ))}
+        <ul className="mt-10 grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7">
+          {FEATURED_BRANDS.map((b) => {
+            const href = featuredBrandHref(b);
+            const external = href.startsWith("http");
+            return (
+              <li key={b.slug} className="flex justify-center">
+                <Link
+                  href={href}
+                  className="flex h-24 w-full max-w-[140px] items-center justify-center rounded-md border border-transparent p-3 transition hover:border-[hsl(350,40%,85%)] hover:bg-[hsl(350,85%,97%)]"
+                  {...(external ? { target: "_blank", rel: "noreferrer" } : {})}
+                >
+                  <Image
+                    src={b.logoSrc}
+                    alt={b.label}
+                    width={140}
+                    height={80}
+                    className="h-auto max-h-16 w-auto object-contain"
+                  />
+                </Link>
+              </li>
+            );
+          })}
         </ul>
+        <p className="mt-10 text-center">
+          <Link
+            href="/shop"
+            className="text-sm font-semibold uppercase tracking-wide text-[hsl(222,47%,18%)] underline-offset-4 hover:underline"
+          >
+            Shop 30+ Brands
+          </Link>
+        </p>
       </div>
     </section>
   );

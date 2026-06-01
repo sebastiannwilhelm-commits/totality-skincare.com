@@ -12,6 +12,11 @@ const nextConfig = {
         hostname: "cdn.shopify.com",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "totality-skincare.com",
+        pathname: "/cdn/shop/files/**",
+      },
     ],
   },
 };
