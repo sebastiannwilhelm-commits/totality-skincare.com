@@ -95,12 +95,6 @@ export function SiteHeader() {
               Skin quiz
             </Link>
             <Link
-              href="/blogs/news"
-              className="shrink-0 whitespace-nowrap transition hover:text-[hsl(222,47%,18%)]"
-            >
-              Blog
-            </Link>
-            <Link
               href="/pages/track-order"
               className="shrink-0 whitespace-nowrap transition hover:text-[hsl(222,47%,18%)]"
             >
@@ -263,9 +257,6 @@ export function SiteHeader() {
               Skin quiz
             </Link>
             <HeaderSupabaseAuthDrawer onLinkClick={() => setOpen(false)} />
-            <Link href="/blogs/news" onClick={() => setOpen(false)} className="rounded-md px-3 py-2 hover:bg-muted">
-              Blog
-            </Link>
             <Link href="/pages/track-order" onClick={() => setOpen(false)} className="rounded-md px-3 py-2 hover:bg-muted">
               Track order
             </Link>

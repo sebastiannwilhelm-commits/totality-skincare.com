@@ -123,12 +123,6 @@ export const TOT_SKINCARE_PARITY: ParityRow[] = [
     notes: "Heart on cards + /wishlist; localStorage until Supabase per-user wishlists.",
   },
   {
-    id: "blog",
-    liveSource: "/blogs/news",
-    status: "partial",
-    notes: "Hub at /blogs/news opens the live Shopify blog until content is migrated.",
-  },
-  {
     id: "contact-page",
     liveSource: "Contact / support",
     status: "partial",

@@ -24,7 +24,6 @@ export const SITE = {
   /** Shopify Tracktor app — same entry customers use today. */
   legacyOrderTrackingUrl: `${LEGACY_STORE_URL}/apps/tracktor/track`,
   legacyRewardsUrl: `${LEGACY_STORE_URL}/pages/rewards`,
-  legacyBlogNewsUrl: `${LEGACY_STORE_URL}/blogs/news`,
   policies: {
     refund: `${LEGACY_STORE_URL}/policies/refund-policy`,
     privacy: `${LEGACY_STORE_URL}/policies/privacy-policy`,

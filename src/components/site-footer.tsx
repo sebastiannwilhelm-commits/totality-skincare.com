@@ -93,11 +93,6 @@ export function SiteFooter() {
                     About Us
                   </a>
                 </li>
-                <li>
-                  <a href={SITE.legacyBlogNewsUrl} className="hover:underline" target="_blank" rel="noreferrer">
-                    Totality Blog
-                  </a>
-                </li>
               </ul>
             </div>
             <div>
