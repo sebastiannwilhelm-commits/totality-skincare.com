@@ -105,10 +105,29 @@
 }
 
 /* Scoped reset so Tailwind preflight does not flatten Shopify markup */
+.product-description {
+  max-width: 100%;
+  min-width: 0;
+}
+
 .product-description .product_description_part_small {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
   font-size: 0.9375rem;
   line-height: 1.65;
   color: hsl(222 30% 32%);
+}
+
+.product-description .product_description_part_small img {
+  display: block;
+  max-width: min(240px, 100%);
+  height: auto;
+  margin: 0.5rem 0;
+}
+
+.product-description .product_description_part_small [style*="white-space"] {
+  white-space: normal !important;
 }
 
 .product-description .product_description_part_small .product_description-title {
@@ -124,11 +143,12 @@
   margin-bottom: 0.75rem;
 }
 
-.product-description .product_description_part_small :where(h2, h3) {
+.product-description .product_description_part_small :where(h1, h2, h3) {
   margin-top: 1.25rem;
   margin-bottom: 0.5rem;
   font-size: 1rem;
   font-weight: 600;
+  line-height: 1.35;
   color: hsl(222 47% 18%);
 }
 
@@ -157,6 +177,10 @@
 
 .product-description .product_description_part_small li {
   margin-bottom: 0.35rem;
+}
+
+.product-description .product_description_part_small li p {
+  margin-bottom: 0;
 }
 
 .product-description .product_description_part_small b,

@@ -55,7 +55,7 @@ export default function ProductPage({ params }: Props) {
             {p.name}
           </h1>
           <p className="mt-4 text-2xl font-semibold">{formatMoney(p.priceCents)}</p>
-          {p.isPrescriptionRequired ? (
+          {p.isPrescriptionRequired && !descriptionHtml ? (
             <p className="mt-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">
               This item may require a prescription or provider review. Checkout will collect intake
               details and hold fulfillment until authorized.

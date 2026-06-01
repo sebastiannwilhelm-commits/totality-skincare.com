@@ -18,7 +18,7 @@ export function ProductDescription({ html }: ProductDescriptionProps) {
   }
 
   return (
-    <div className="product-description mt-6 truncate has-padding-top">
+    <div className="product-description mt-6 min-w-0 max-w-full truncate has-padding-top">
       <div
         className={cn(
           "description product_description_part_small content truncate__long",
