@@ -1,9 +1,11 @@
 import * as jose from "jose";
 
+import { getAdminSessionSigningMaterial } from "@/lib/auth/admin-session-secret";
+
 export const ADMIN_SESSION_COOKIE = "pd_admin_session";
 
 function getSecretKey(): Uint8Array | null {
-  const s = process.env.ADMIN_SESSION_SECRET?.trim();
+  const s = getAdminSessionSigningMaterial();
   if (!s) return null;
   return new TextEncoder().encode(s);
 }

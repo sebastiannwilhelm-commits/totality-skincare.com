@@ -1,4 +1,5 @@
 import { getAdminEmailAllowlist } from "@/lib/auth/admin-emails";
+import { isAdminSessionSigningConfigured } from "@/lib/auth/admin-session-secret";
 import { isFirebasePublicConfigured } from "@/lib/firebase/public-env";
 
 export type AdminConfigStatus = {
@@ -11,7 +12,7 @@ export type AdminConfigStatus = {
 export function getAdminConfigStatus(): AdminConfigStatus {
   return {
     firebase: isFirebasePublicConfigured(),
-    adminSession: Boolean(process.env.ADMIN_SESSION_SECRET?.trim()),
+    adminSession: isAdminSessionSigningConfigured(),
     adminEmails: getAdminEmailAllowlist().length > 0,
   };
 }

@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 import { getAdminEmailAllowlist, isAllowlistedAdminEmail } from "@/lib/auth/admin-emails";
+import { isAdminSessionSigningConfigured } from "@/lib/auth/admin-session-secret";
 import { ADMIN_SESSION_COOKIE, verifyAdminSessionToken } from "@/lib/auth/admin-session-token";
 import { createClient } from "@/lib/supabase/server";
 
@@ -9,7 +10,7 @@ export type AdminApiUser = { id: string; email: string };
 
 async function tryFirebaseAllowlistSession(): Promise<AdminApiUser | null> {
   if (getAdminEmailAllowlist().length === 0) return null;
-  if (!process.env.ADMIN_SESSION_SECRET?.trim()) return null;
+  if (!isAdminSessionSigningConfigured()) return null;
   const cookieStore = await cookies();
   const raw = cookieStore.get(ADMIN_SESSION_COOKIE)?.value;
   if (!raw) return null;

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { isAllowlistedAdminEmail } from "@/lib/auth/admin-emails";
+import { isAdminSessionSigningConfigured } from "@/lib/auth/admin-session-secret";
 import { ADMIN_SESSION_COOKIE, signAdminSessionToken } from "@/lib/auth/admin-session-token";
 import { verifyFirebaseIdToken } from "@/lib/auth/firebase-id-token";
 
@@ -11,7 +12,7 @@ export async function POST(req: Request) {
   if (!projectId) {
     return NextResponse.json({ error: "firebase_project_not_configured" }, { status: 503 });
   }
-  if (!process.env.ADMIN_SESSION_SECRET?.trim()) {
+  if (!isAdminSessionSigningConfigured()) {
     return NextResponse.json({ error: "admin_session_secret_missing" }, { status: 503 });
   }
 
