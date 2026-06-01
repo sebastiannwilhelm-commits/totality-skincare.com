@@ -3,8 +3,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ProductActions } from "@/components/product-actions";
+import { ProductDescription } from "@/components/product-description";
 import { RecentlyViewedTracker } from "@/components/recently-viewed-tracker";
 import { formatMoney, productBySlug, PRODUCTS } from "@/config/store";
+import { productDescriptionHtml } from "@/lib/product-descriptions";
 
 type Props = { params: { slug: string } };
 
@@ -21,6 +23,7 @@ export function generateMetadata({ params }: Props) {
 export default function ProductPage({ params }: Props) {
   const p = productBySlug(params.slug);
   if (!p) notFound();
+  const descriptionHtml = productDescriptionHtml(p.slug);
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:py-14">
@@ -51,7 +54,11 @@ export default function ProductPage({ params }: Props) {
               details and hold fulfillment until authorized.
             </p>
           ) : null}
-          <p className="mt-6 text-sm leading-relaxed text-muted-foreground">{p.description}</p>
+          {descriptionHtml ? (
+            <ProductDescription html={descriptionHtml} />
+          ) : (
+            <p className="mt-6 text-sm leading-relaxed text-muted-foreground">{p.description}</p>
+          )}
           <div className="mt-8">
             <ProductActions product={p} />
           </div>

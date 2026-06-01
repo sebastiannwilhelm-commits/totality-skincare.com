@@ -219,3 +219,13 @@ lines.push("");
 const outPath = path.join(root, "src", "config", "catalog-products.ts");
 fs.writeFileSync(outPath, lines.join("\n"), "utf8");
 console.log(`Wrote ${outPath} (${filtered.length} products, ${BRANDS.length} brands)`);
+
+/** Full Shopify body_html for PDP — same content as totality-skincare.com “More Details” blocks. */
+const descriptions = {};
+for (const p of filtered) {
+  descriptions[p.handle] = p.body_html?.trim() || "";
+}
+const descPath = path.join(root, "src", "data", "catalog-descriptions.json");
+fs.mkdirSync(path.dirname(descPath), { recursive: true });
+fs.writeFileSync(descPath, JSON.stringify(descriptions), "utf8");
+console.log(`Wrote ${descPath} (${Object.keys(descriptions).length} HTML descriptions)`);
